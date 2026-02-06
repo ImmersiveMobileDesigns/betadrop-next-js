@@ -1,0 +1,371 @@
+yarn run v1.22.22
+$ next build
+  ▲ Next.js 14.2.35
+  - Environments: .env.local, .env.production, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./src/app/(dashboard)/settings/page.tsx
+63:6  Warning: React Hook useEffect has a missing dependency: 'fetchUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/blog/page.tsx
+171:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+220:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/blog/BlogLayout.tsx
+69:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/build/BuildBranding.tsx
+110:17  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./src/components/build/BuildManagement.tsx
+91:6  Warning: React Hook useEffect has missing dependencies: 'fetchAnalytics', 'fetchFeedback', and 'fetchShareLinks'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+223:5  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+225:5  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+269:18  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/shared/AppInstallView.tsx
+278:6  Warning: React Hook useEffect has a missing dependency: 'createdDate'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/shared/UploadSuccess.tsx
+113:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/58) ...
+Unable to access cookies in fetchFromLaravel n [Error]: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at f (C:\Project\betadrop-laravel\.next\server\chunks\8601.js:1:2768)
+    at o (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:9382)
+    at Module.b (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6239) {
+  code: 'NEXT_STATIC_GEN_BAILOUT'
+}
+Failed to fetch from Laravel (http://localhost:8000/api/install/undefined): n [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/install/undefined /install/id_disabled
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:10769
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:18390
+    at a.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:8885)
+    at u.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:3085)
+    at u.startActiveSpan (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:18140)
+    at a.startActiveSpan (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:18674)
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:17923
+    at a.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:8885)
+    at u.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:3085)
+    at b.trace (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:17877) {
+  description: 'no-store fetch http://localhost:8000/api/install/undefined /install/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Unable to access cookies in fetchFromLaravel n [Error]: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at f (C:\Project\betadrop-laravel\.next\server\chunks\8601.js:1:2768)
+    at o (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:9382)
+    at Module.b (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6239)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT'
+}
+Failed to fetch from Laravel (http://localhost:8000/api/install/undefined): n [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/install/undefined /install/id_disabled
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:10769
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:18390
+    at a.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:8885)
+    at u.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:3085)
+    at u.startActiveSpan (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:18140)
+    at a.startActiveSpan (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:18674)
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:17923
+    at a.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:8885)
+    at u.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:3085)
+    at b.trace (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:17877) {
+  description: 'no-store fetch http://localhost:8000/api/install/undefined /install/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+n [Error]: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.then`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at Object.get (C:\Project\betadrop-laravel\.next\server\chunks\2258.js:2:33676)
+    at f (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6708) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '1763007038'
+}
+n [Error]: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.then`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at Object.get (C:\Project\betadrop-laravel\.next\server\chunks\2258.js:2:33676)
+    at f (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6708)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '1097779579'
+}
+n [Error]: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.then`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at Object.get (C:\Project\betadrop-laravel\.next\server\chunks\2258.js:2:33676)
+    at f (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6708)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '1097779579'
+}
+Unable to access cookies in fetchFromLaravel n [Error]: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at f (C:\Project\betadrop-laravel\.next\server\chunks\8601.js:1:2768)
+    at o (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:9382)
+    at Module.b (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6239) {
+  code: 'NEXT_STATIC_GEN_BAILOUT'
+}
+Failed to fetch from Laravel (http://localhost:8000/api/install/undefined): n [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/install/undefined /install/id_disabled
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:10769
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:18390
+    at a.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:8885)
+    at u.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:3085)
+    at u.startActiveSpan (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:18140)
+    at a.startActiveSpan (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:18674)
+    at C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:17923
+    at a.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:8885)
+    at u.with (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:3085)
+    at b.trace (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:2:17877) {
+  description: 'no-store fetch http://localhost:8000/api/install/undefined /install/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+
+Error occurred prerendering page "/install/id_disabled". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Route /install/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.then`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at Object.get (C:\Project\betadrop-laravel\.next\server\chunks\2258.js:2:33676)
+    at f (C:\Project\betadrop-laravel\.next\server\app\install\id_disabled\page.js:1:6708)
+   Generating static pages (14/58) 
+   Generating static pages (28/58) 
+   Generating static pages (43/58) 
+n [Error]: Route / with `dynamic = "error"` couldn't be rendered statically because it used `unstable_noStore()`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at c (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:35796)
+    at i (C:\Project\betadrop-laravel\.next\server\chunks\7806.js:1:7199)
+    at a (C:\Project\betadrop-laravel\.next\server\app\page.js:6:62953)
+    at R (C:\Project\betadrop-laravel\.next\server\app\page.js:6:50241)
+    at em (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:134808)
+    at e (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:137693)
+    at e_ (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142242) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3303183799'
+}
+n [Error]: Route / with `dynamic = "error"` couldn't be rendered statically because it used `unstable_noStore()`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at c (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:35796)
+    at i (C:\Project\betadrop-laravel\.next\server\chunks\7806.js:1:7199)
+    at a (C:\Project\betadrop-laravel\.next\server\app\page.js:6:62953)
+    at R (C:\Project\betadrop-laravel\.next\server\app\page.js:6:50241)
+    at em (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:134808)
+    at e (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:137693)
+    at e_ (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142242) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3303183799'
+}
+n [Error]: Route / with `dynamic = "error"` couldn't be rendered statically because it used `unstable_noStore()`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at c (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:35796)
+    at i (C:\Project\betadrop-laravel\.next\server\chunks\7806.js:1:7199)
+    at a (C:\Project\betadrop-laravel\.next\server\app\page.js:6:62953)
+    at R (C:\Project\betadrop-laravel\.next\server\app\page.js:6:50241)
+    at em (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:134808)
+    at e (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:137693)
+    at e_ (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142242) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3303183799'
+}
+
+Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Route / with `dynamic = "error"` couldn't be rendered statically because it used `unstable_noStore()`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at c (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:35796)
+    at i (C:\Project\betadrop-laravel\.next\server\chunks\7806.js:1:7199)
+    at a (C:\Project\betadrop-laravel\.next\server\app\page.js:6:62953)
+    at R (C:\Project\betadrop-laravel\.next\server\app\page.js:6:50241)
+    at em (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:134808)
+    at e (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:137693)
+    at e_ (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142242)
+tX [Error]: Page with `dynamic = "force-dynamic"` couldn't be exported. `output: "export"` requires all pages be renderable statically because there is not runtime server to dynamic render routes in this output format. Learn more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+    at rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:7427)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '778520208'
+}
+tX [Error]: Page with `dynamic = "force-dynamic"` couldn't be exported. `output: "export"` requires all pages be renderable statically because there is not runtime server to dynamic render routes in this output format. Learn more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+    at rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:7427)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '778520208'
+}
+tX [Error]: Page with `dynamic = "force-dynamic"` couldn't be exported. `output: "export"` requires all pages be renderable statically because there is not runtime server to dynamic render routes in this output format. Learn more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+    at rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:7427)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '778520208'
+}
+tX [Error]: Page with `dynamic = "force-dynamic"` couldn't be exported. `output: "export"` requires all pages be renderable statically because there is not runtime server to dynamic render routes in this output format. Learn more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+    at rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:7427)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '778520208'
+}
+Unable to access cookies in fetchFromLaravel n [Error]: Route /builds/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at f (C:\Project\betadrop-laravel\.next\server\chunks\8601.js:1:2768)
+    at o (C:\Project\betadrop-laravel\.next\server\chunks\4941.js:1:5493)
+    at n (C:\Project\betadrop-laravel\.next\server\chunks\4941.js:1:6363)
+    at d (C:\Project\betadrop-laravel\.next\server\app\(dashboard)\builds\id_disabled\page.js:5:80506)
+    at em (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:134808)
+    at e (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:137693)
+    at e_ (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>) {
+  code: 'NEXT_STATIC_GEN_BAILOUT'
+}
+Failed to fetch from Laravel (http://localhost:8000/api/auth/session): B [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled
+    at C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:37206
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:103
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NextTracerImpl.trace (C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:28) {
+  description: 'no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Failed to get current user: B [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled
+    at C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:37206
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:103
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NextTracerImpl.trace (C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:28) {
+  description: 'no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Unable to access cookies in fetchFromLaravel n [Error]: Route /builds/id_disabled with `dynamic = "error"` couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (C:\Project\betadrop-laravel\.next\server\chunks\8948.js:1:36877)
+    at f (C:\Project\betadrop-laravel\.next\server\chunks\8601.js:1:2768)
+    at o (C:\Project\betadrop-laravel\.next\server\chunks\4941.js:1:5493)
+    at n (C:\Project\betadrop-laravel\.next\server\chunks\4941.js:1:6363)
+    at d (C:\Project\betadrop-laravel\.next\server\app\(dashboard)\builds\id_disabled\page.js:5:80506)
+    at em (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:134808)
+    at e (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:137693)
+    at e_ (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>) {
+  code: 'NEXT_STATIC_GEN_BAILOUT'
+}
+Failed to fetch from Laravel (http://localhost:8000/api/auth/session): B [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled
+    at C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:37206
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:103
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NextTracerImpl.trace (C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:28) {
+  description: 'no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Failed to get current user: B [Error]: Dynamic server usage: no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled
+    at C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:37206
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:103
+    at NoopContextManager.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NextTracerImpl.trace (C:\Project\betadrop-laravel\node_modules\next\dist\server\lib\trace\tracer.js:122:28) {
+  description: 'no-store fetch http://localhost:8000/api/auth/session /builds/id_disabled',
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+
+Error occurred prerendering page "/dashboard". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Page with `dynamic = "force-dynamic"` couldn't be exported. `output: "export"` requires all pages be renderable statically because there is not runtime server to dynamic render routes in this output format. Learn more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+    at rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:7427)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+
+Error occurred prerendering page "/builds". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Page with `dynamic = "force-dynamic"` couldn't be exported. `output: "export"` requires all pages be renderable statically because there is not runtime server to dynamic render routes in this output format. Learn more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+    at rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:7427)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:575:9)
+    at process.processTimers (node:internal/timers:549:7)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+    at async C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9508
+    at async Promise.all (index 0)
+    at async rY (C:\Project\betadrop-laravel\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:17:9345)
+ ✓ Generating static pages (58/58)
+
+> Export encountered errors on following paths:
+	/(dashboard)/builds/page: /builds
+	/(dashboard)/dashboard/page: /dashboard
+	/install/id_disabled/page: /install/id_disabled
+	/page: /
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

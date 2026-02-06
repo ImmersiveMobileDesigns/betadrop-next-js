@@ -1,0 +1,51 @@
+{
+  "name": "betadrop",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prod": "next build && rsync -av --delete --exclude='index.php' --exclude='storage' --exclude='.htaccess' --exclude='builds' --exclude='out' --exclude='out.zip' out/ ../backend/public/",
+    "postinstall": "echo 'Skipping prisma generate'",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:sync": "prisma generate && prisma db push --accept-data-loss=false",
+    "db:pull": "prisma db pull",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@headlessui/react": "^2.2.9",
+    "@simplewebauthn/browser": "^11.0.0",
+    "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-query-devtools": "^5.91.3",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.26.0",
+    "gsap": "^3.14.2",
+    "lenis": "^1.3.17",
+    "lucide-react": "^0.562.0",
+    "next": "^14.2.21",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^22.10.2",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
+    "dotenv": "^17.2.3",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.21",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  }
+}
