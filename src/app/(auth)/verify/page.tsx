@@ -37,6 +37,7 @@ function VerifyForm() {
            throw new Error(data.error || 'Verification failed');
         }
       } catch (err) {
+         console.log(err);
         setStatus('error');
         setError(err instanceof Error ? err.message : 'Verification failed');
       }

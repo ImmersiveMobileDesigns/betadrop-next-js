@@ -483,13 +483,25 @@ export const useUpdateBuild = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
-      const response = await fetchFromLaravel<{ success: boolean; data: Build }>(`/api/builds/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiBase}/api/builds/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
         body: JSON.stringify(updates),
       });
-      if (response.success && response.data) {
-        return response.data;
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to update build');
+      }
+      
+      const data = await response.json();
+      if (data.success && data.data) {
+        return data.data as Build;
       }
       throw new Error('Failed to update build');
     },

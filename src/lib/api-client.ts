@@ -32,9 +32,18 @@ export async function fetchFromLaravel<T = any>(path: string, options: RequestIn
        // Log error details for debugging
        console.error(`Status: ${response.status} for ${url}`);
        try {
-         const errorBody = await response.text();
-         console.error('Error body:', errorBody);
-       } catch {}
+         const errorData = await response.json();
+         console.error('Error body:', errorData);
+         // Throw error with API error message if available
+         throw new Error(errorData.error || errorData.message || `Request failed with status ${response.status}`);
+       } catch (parseError) {
+         // If it's an Error we threw above, re-throw it
+         if (parseError instanceof Error) {
+           throw parseError;
+         }
+         // If JSON parsing fails completely, throw generic error
+         throw new Error(`Request failed with status ${response.status}`);
+       }
     }
 
     // Handle 204 No Content

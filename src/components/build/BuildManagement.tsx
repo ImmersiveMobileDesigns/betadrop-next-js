@@ -91,7 +91,7 @@ export default function EnhancedBuildManagement({ build: initialBuild }: BuildMa
     }
   }, [shareLinksData]);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+  const appUrl = process.env.NEXT_PUBLIC_FRONT_APP_URL || 'http://localhost:3001';
   const installUrl = `${appUrl}/install/?i=${build.default_short_id || build.id}`;
 
 

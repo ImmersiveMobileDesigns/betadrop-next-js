@@ -14,7 +14,7 @@ interface BuildCardProps {
 
 export default function BuildCard({ build, onDelete }: BuildCardProps) {
   const [copied, setCopied] = useState(false);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+  const appUrl = process.env.NEXT_PUBLIC_FRONT_APP_URL || 'https://betadrop.app';
   const installUrl = `${appUrl}/install/?i=${build.default_short_id || build.id}`;
 
   const copyLink = async () => {
