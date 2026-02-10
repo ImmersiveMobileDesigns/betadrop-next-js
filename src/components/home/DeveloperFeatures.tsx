@@ -54,7 +54,7 @@ const featureCategories: FeatureCategory[] = [
     features: [
       {
         title: 'Auto-Detect Everything',
-        description: 'App name, version, build number, bundle ID extracted instantly. Permanent hosting by default.',
+        description: 'App name, version, build number, bundle ID extracted instantly. 30-day hosting by default.',
         benefit: 'Save 2 minutes per upload',
         icon: Search,
         iconColor: 'text-blue-400',
@@ -90,7 +90,7 @@ const featureCategories: FeatureCategory[] = [
     features: [
       {
         title: 'Smart Expiry Rules',
-        description: 'Default to No Expiry (Permanent) for your builds, or set custom rules: Time-based, download-limit, or device-limit.',
+        description: 'Default to 30-Day for your builds, or set custom rules: Time-based, download-limit, or device-limit.',
         benefit: 'Control distribution precisely',
         icon: Clock,
         iconColor: 'text-purple-400',

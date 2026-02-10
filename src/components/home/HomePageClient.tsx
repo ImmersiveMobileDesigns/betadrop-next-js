@@ -256,8 +256,8 @@ export default function HomePageClient() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
-                  title: 'Permanent Hosting',
-                  description: 'Sign in to get permanent, non-expiring links. Guest uploads expire in 30 days.',
+                  title: '30-Day Hosting',
+                  description: 'Sign in to get links available for 30 days. Guest uploads expire in 3 days.',
                   icon: InfinityIcon,
                   gradient: 'from-green-500/20 to-emerald-500/20',
                   iconColor: 'text-emerald-400'

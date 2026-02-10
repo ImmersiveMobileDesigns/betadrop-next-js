@@ -158,8 +158,8 @@ We respect "Do Not Track" browser signals where technically feasible. When enabl
     title: '7. Data Retention',
     icon: Database,
     content: `**Retention Periods**
-• **Guest Uploads**: Files automatically deleted after 30 days
-• **Registered User Content**: Retained until you delete them or your account
+• **Guest Uploads**: Files automatically deleted after 3 days
+• **Registered User Content**: Retained for 30 days or until you delete them
 • **Account Data**: Kept while your account is active
 • **Log Data**: Typically retained for 90 days for security analysis
 • **Analytics**: Aggregated statistics retained indefinitely (no personal data)

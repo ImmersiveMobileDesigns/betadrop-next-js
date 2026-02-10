@@ -34,8 +34,8 @@ These terms apply to all users of the Platform, including developers, testers, a
 • **File Hosting**: Temporary and permanent hosting for mobile application files
 • **Link Generation**: Secure, shareable installation links for testers
 • **OTA Installation**: Direct installation on iOS and Android devices without app store involvement
-• **Guest Access**: Anonymous uploads with 30-day expiration
-• **Developer Accounts**: Registered users receive permanent hosting and additional features
+• **Guest Access**: Anonymous uploads with 3-day expiration
+• **Developer Accounts**: Registered users receive 30-day hosting and additional features
 
 The Service is provided "as is" and "as available" without warranties of any kind, either express or implied.`,
   },
@@ -99,10 +99,10 @@ Certain components of our platform may utilize open-source software, subject to 
     title: '6. Data Storage & Retention',
     icon: Clock,
     content: `**Guest Uploads**
-Files uploaded by non-registered users are stored for 30 days from the upload date. After this period, files and associated data are automatically deleted.
+Files uploaded by non-registered users are stored for 3 days from the upload date. After this period, files and associated data are automatically deleted.
 
 **Registered User Content**
-Developers with accounts enjoy permanent hosting. However, we reserve the right to remove inactive content or content that violates our terms.
+Developers with accounts enjoy 30-day hosting. However, we reserve the right to remove inactive content or content that violates our terms.
 
 **Backups & Recovery**
 While we implement reasonable backup procedures, we do not guarantee data recovery. Users are responsible for maintaining their own backups of important files.
