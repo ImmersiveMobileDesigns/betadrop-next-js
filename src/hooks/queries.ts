@@ -137,7 +137,7 @@ export const usePlatformStats = () => {
     queryFn: async () => {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
       const response = await fetch(`${apiBase}/api/stats/counter`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
         credentials: 'include',
       });
       
@@ -309,7 +309,7 @@ export const useInstallData = (id: string | null, token: string | null) => {
       const url = `${apiBase}/api/install/${id}${queryParams.toString() ? `?${queryParams}` : ''}`;
       
       const response = await fetch(url, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
         credentials: 'include',
       });
       
@@ -340,6 +340,7 @@ export const useGuestAppData = (token: string | null) => {
       
       const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
       const response = await fetch(`${apiBase}/api/guest/app/${token}`, {
+        headers: { 'Accept': 'application/json' },
         credentials: 'include',
       });
       
@@ -439,6 +440,8 @@ const uploadFile = async (
     
     xhr.open('POST', url);
     xhr.withCredentials = true;
+    // Tell Laravel to respond with JSON (important for error responses)
+    xhr.setRequestHeader('Accept', 'application/json');
     xhr.send(formData);
   });
 };

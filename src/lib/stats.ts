@@ -14,8 +14,9 @@ export async function getPlatformStats(): Promise<PlatformStats> {
   try {
     const res = await fetch(`${API_URL}/stats/counter`, {
       cache: 'no-store',
+      credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
 

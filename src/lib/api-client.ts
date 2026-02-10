@@ -8,13 +8,17 @@ export async function fetchFromLaravel<T = any>(path: string, options: RequestIn
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${cleanPath}`;
 
   const headers = new Headers(options.headers);
+  
+  // Determine the HTTP method
+  const method = (options.method || 'GET').toUpperCase();
 
-  // Default headers
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+  // Only set Content-Type on requests with a body (POST, PUT, PATCH)
+  // Setting it on GET requests triggers an unnecessary CORS preflight
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData) && ['POST', 'PUT', 'PATCH'].includes(method)) {
     headers.set('Content-Type', 'application/json');
   }
   
-  // Ensure we accept JSON
+  // Always request JSON responses
   if (!headers.has('Accept')) {
     headers.set('Accept', 'application/json');
   }
