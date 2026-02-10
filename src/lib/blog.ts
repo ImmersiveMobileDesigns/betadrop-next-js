@@ -12,9 +12,92 @@ export interface BlogPost {
   readTime: number; // in minutes
   author: string;
   image?: string;
+  views?: number;
+  likes?: number;
+  relatedApps?: {
+    name: string;
+    platform: 'ios' | 'android';
+    icon: string;
+    url: string;
+  }[];
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: 'implementing-passkeys-mobile-apps',
+    title: 'The End of Passwords? Implementing Passkeys in Mobile Apps',
+    metaDescription: 'Say goodbye to passwords. Learn how to implement Passkeys in your iOS and Android apps for better security and user experience.',
+    h1: 'The End of Passwords? Implementing Passkeys in Mobile Apps',
+    primaryKeyword: 'passkeys mobile apps',
+    secondaryKeywords: ['passwordless authentication', 'fido credentials', 'biometric login', 'mobile security 2026', 'implement passkeys android ios'],
+    publishedAt: '2026-02-03',
+    updatedAt: '2026-02-03',
+    readTime: 6,
+    author: 'BetaDrop Team',
+    image: '/images/blog/passkeys_mobile.png',
+    views: 1540,
+    likes: 85
+  },
+  {
+    slug: 'ar-vr-app-testing-best-practices',
+    title: 'AR/VR App Testing: Best Practices for Immersive Experiences',
+    metaDescription: 'Testing Augmented and Virtual Reality apps requires a new approach. Discover best practices for testing immersive mobile experiences.',
+    h1: 'AR/VR App Testing: Best Practices for Immersive Experiences',
+    primaryKeyword: 'ar vr app testing',
+    secondaryKeywords: ['immersive tech testing', 'mobile ar testing', 'virtual reality qa', 'spatial computing testing', 'unity unreal testing'],
+    publishedAt: '2026-02-02',
+    updatedAt: '2026-02-02',
+    readTime: 9,
+    author: 'BetaDrop Team',
+    image: '/images/blog/ar_vr_testing.png',
+    views: 2100,
+    likes: 120
+  },
+  {
+    slug: 'zero-trust-security-mobile-apps',
+    title: 'Zero Trust Security for Mobile Apps Explained',
+    metaDescription: 'What is Zero Trust and why does it matter for mobile apps? We explain the principles of Zero Trust security architecture for mobile developers.',
+    h1: 'Zero Trust Security for Mobile Apps Explained',
+    primaryKeyword: 'zero trust mobile apps',
+    secondaryKeywords: ['mobile app security', 'zero trust architecture', 'secure mobile development', 'identity aware proxy', 'context aware access'],
+    publishedAt: '2026-02-01',
+    updatedAt: '2026-02-01',
+    readTime: 8,
+    author: 'BetaDrop Team',
+    image: '/images/blog/zero_trust_mobile.png',
+    views: 3400,
+    likes: 230
+  },
+  {
+    slug: '5g-edge-computing-mobile-performance',
+    title: '5G and Edge Computing: Optimizing Mobile App Performance',
+    metaDescription: 'Leverage the power of 5G and Edge Computing to build ultra-fast mobile apps. Learn how to optimize latency and bandwidth for the new era.',
+    h1: '5G and Edge Computing: Optimizing Mobile App Performance',
+    primaryKeyword: '5g edge computing mobile',
+    secondaryKeywords: ['low latency apps', 'mobile edge computing', '5g app development', 'network optimization', 'future mobile tech'],
+    publishedAt: '2026-01-31',
+    updatedAt: '2026-01-31',
+    readTime: 7,
+    author: 'BetaDrop Team',
+    image: '/images/blog/5g_edge_mobile.png',
+    views: 4500,
+    likes: 310
+  },
+  {
+    slug: 'rise-of-superapps-mobile-testing',
+    title: 'The Rise of Superapps: Implications for Mobile Testing',
+    metaDescription: 'Superapps are taking over. Understand the unique challenges of testing massive, multi-functional applications like WeChat or Grab.',
+    h1: 'The Rise of Superapps: Implications for Mobile Testing',
+    primaryKeyword: 'superapps mobile testing',
+    secondaryKeywords: ['superapp architecture', 'testing mini programs', 'scale mobile testing', 'multifunctional app qa', 'global app trends'],
+    publishedAt: '2026-01-30',
+    updatedAt: '2026-01-30',
+    readTime: 8,
+    author: 'BetaDrop Team',
+    image: '/images/blog/rise_of_superapps.png',
+    views: 5200,
+    likes: 450
+  },
   {
     slug: 'ai-driven-devops-mobile-cicd',
     title: 'AI-Driven DevOps: The Future of Mobile CI/CD',
@@ -26,7 +109,13 @@ export const blogPosts: BlogPost[] = [
     updatedAt: '2026-01-29',
     readTime: 8,
     author: 'BetaDrop Team',
-    image: '/images/blog/ai_devops.png'
+    image: '/images/blog/ai_devops.png',
+    views: 12540,
+    likes: 342,
+    relatedApps: [
+      { name: 'BetaDrop Android', platform: 'android', icon: '/android-chrome-192x192.png', url: '/' },
+      { name: 'BetaDrop iOS', platform: 'ios', icon: '/apple-touch-icon.png', url: '/' }
+    ]
   },
   {
     slug: 'mobile-app-design-trends-2026',
@@ -39,7 +128,9 @@ export const blogPosts: BlogPost[] = [
     updatedAt: '2026-01-29',
     readTime: 6,
     author: 'BetaDrop Team',
-    image: '/images/blog/design_trends_2026.png'
+    image: '/images/blog/design_trends_2026.png',
+    views: 8920,
+    likes: 215
   },
   {
     slug: 'automated-sentiment-analysis-beta-feedback',
@@ -537,6 +628,12 @@ export function getAllBlogPosts(): BlogPost[] {
 export function getRelatedPosts(currentSlug: string, limit: number = 3): BlogPost[] {
   return blogPosts
     .filter((post) => post.slug !== currentSlug)
+    .slice(0, limit);
+}
+
+export function getTopPosts(limit: number = 5): BlogPost[] {
+  return blogPosts
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
     .slice(0, limit);
 }
 
