@@ -11,7 +11,7 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
         // Prevent automatic refetching on window focus/reconnect for now
         // to avoid "double call" confusion unless specifically needed
         refetchOnWindowFocus: false,
-        retry: 1,
+        retry: 5,
         staleTime: 2 * 60 * 1000, // Data is fresh for 2 minutes
       },
     },

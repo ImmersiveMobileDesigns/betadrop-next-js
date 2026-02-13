@@ -1,12 +1,95 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useInstallData } from '@/hooks/queries';
 import { detectDevice, generateIOSInstallUrl } from '@/lib/utils';
 import type { DeviceInfo } from '@/types';
 import AppInstallView from '@/components/shared/AppInstallView';
 import LinkExpiredView from '@/components/shared/LinkExpiredView';
+
+const DEFAULT_OG_IMAGE = '/og-image.png';
+const SITE_NAME = 'BetaDrop';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betadrop.app';
+
+/**
+ * Dynamically updates document head meta tags for SEO.
+ * Since this is a statically exported app, we update meta tags client-side
+ * once the install data (app name, icon, etc.) is available.
+ */
+function useInstallPageSEO(appName?: string, iconUrl?: string, platform?: string) {
+  useEffect(() => {
+    if (!appName) return;
+
+    const platformLabel = platform === 'ipa' ? 'iOS' : platform === 'apk' ? 'Android' : '';
+    const title = `Install ${appName}${platformLabel ? ` (${platformLabel})` : ''} | ${SITE_NAME}`;
+    const description = `Install ${appName} on your ${platformLabel || 'mobile'} device via ${SITE_NAME}. Fast, free beta app distribution — no TestFlight required.`;
+
+    // Determine OG image: use app icon if available, fallback to default
+    const ogImage = iconUrl && iconUrl.trim() !== '' ? iconUrl : `${APP_URL}${DEFAULT_OG_IMAGE}`;
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : APP_URL;
+
+    // Set document title
+    document.title = title;
+
+    // Helper to set or create a meta tag
+    const setMeta = (attribute: string, key: string, content: string) => {
+      let element = document.querySelector(`meta[${attribute}="${key}"]`) as HTMLMetaElement | null;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, key);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    // Standard meta tags
+    setMeta('name', 'description', description);
+    setMeta('name', 'keywords', `${appName}, beta app, install ${appName}, ${platformLabel} beta testing, app distribution, BetaDrop`);
+
+    // Open Graph tags
+    setMeta('property', 'og:title', title);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:image', ogImage);
+    setMeta('property', 'og:image:alt', `${appName} - App Icon`);
+    setMeta('property', 'og:url', currentUrl);
+    setMeta('property', 'og:type', 'website');
+    setMeta('property', 'og:site_name', SITE_NAME);
+
+    // Twitter Card tags
+    setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', title);
+    setMeta('name', 'twitter:description', description);
+    setMeta('name', 'twitter:image', ogImage);
+    setMeta('name', 'twitter:image:alt', `${appName} - App Icon`);
+
+    // Cleanup: restore defaults on unmount
+    return () => {
+      document.title = `${SITE_NAME} - Free iOS & Android Beta App Distribution`;
+      setMeta('name', 'description', 'The free, simple way to distribute iOS and Android beta apps. Upload IPA or APK files and share install links with your testers. No TestFlight required.');
+
+      // Remove dynamically added OG/Twitter tags
+      const dynamicSelectors = [
+        'meta[property="og:title"]',
+        'meta[property="og:description"]',
+        'meta[property="og:image"]',
+        'meta[property="og:image:alt"]',
+        'meta[property="og:url"]',
+        'meta[property="og:type"]',
+        'meta[property="og:site_name"]',
+        'meta[name="twitter:card"]',
+        'meta[name="twitter:title"]',
+        'meta[name="twitter:description"]',
+        'meta[name="twitter:image"]',
+        'meta[name="twitter:image:alt"]',
+      ];
+      dynamicSelectors.forEach((selector) => {
+        const el = document.querySelector(selector);
+        if (el) el.remove();
+      });
+    };
+  }, [appName, iconUrl, platform]);
+}
 
 function InstallPageContent() {
   const searchParams = useSearchParams();
@@ -23,6 +106,26 @@ function InstallPageContent() {
 
   // Use React Query hook for install data - prevents duplicate calls
   const { data, isLoading, error } = useInstallData(id, token);
+
+  // Extract SEO-relevant values from loaded data
+  const seoAppName = data
+    ? data.type === 'guest'
+      ? data.appName
+      : data.build.name
+    : undefined;
+
+  const seoIconUrl = data?.iconUrl || undefined;
+
+  const seoPlatform = data
+    ? data.type === 'guest'
+      ? data.fileType
+      : data.build.platform === 'ios'
+        ? 'ipa'
+        : 'apk'
+    : undefined;
+
+  // Apply dynamic SEO meta tags
+  useInstallPageSEO(seoAppName, seoIconUrl, seoPlatform);
 
   if (isLoading) {
     return (
@@ -136,4 +239,3 @@ export default function InstallPage() {
     </Suspense>
   );
 }
-

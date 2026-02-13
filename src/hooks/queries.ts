@@ -327,7 +327,7 @@ export const useInstallData = (id: string | null, token: string | null) => {
     },
     staleTime: STALE_TIME,
     enabled: !!id,
-    retry: false, // Don't retry on error (expired links, etc.)
+    // retry: false, // Don't retry on error (expired links, etc.)
   });
 };
 
@@ -357,7 +357,7 @@ export const useGuestAppData = (token: string | null) => {
     },
     staleTime: STALE_TIME,
     enabled: !!token,
-    retry: false,
+    // retry: false,
   });
 };
 

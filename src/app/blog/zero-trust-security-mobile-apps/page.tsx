@@ -6,6 +6,9 @@ const slug = 'zero-trust-security-mobile-apps';
 const post = getBlogPost(slug)!;
 
 export const metadata: Metadata = {
+  alternates: {
+    canonical: `/blog/${post.slug}`,
+  },
   title: post.title,
   description: post.metaDescription,
   keywords: [post.primaryKeyword, ...post.secondaryKeywords],
