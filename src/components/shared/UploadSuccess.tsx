@@ -1,10 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Check, Copy, ExternalLink, RefreshCw, QrCode as QrCodeIcon, Share2, Smartphone } from 'lucide-react';
-import QRCode from 'qrcode';
-import { Button } from '../ui/Button';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  RefreshCw,
+  QrCode as QrCodeIcon,
+  Share2,
+  Smartphone,
+} from "lucide-react";
+import QRCode from "qrcode";
+import { Button } from "../ui/Button";
+import { useUserSession, useAppConfig } from "@/hooks/queries";
 
 interface UploadSuccessProps {
   url: string;
@@ -27,7 +36,7 @@ export default function UploadSuccess({
   onUploadAnother,
   showQRCode = true,
   description,
-  platform = 'android',
+  platform = "android",
   meta,
 }: UploadSuccessProps) {
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
@@ -41,12 +50,12 @@ export default function UploadSuccess({
         width: 400,
         margin: 1,
         color: {
-          dark: '#000000',
-          light: '#ffffff',
+          dark: "#000000",
+          light: "#ffffff",
         },
       })
         .then((dataUrl) => setQrCodeData(dataUrl))
-        .catch((err) => console.error('QR Code generation failed', err));
+        .catch((err) => console.error("QR Code generation failed", err));
     }
   }, [url, showQRCode]);
 
@@ -56,11 +65,39 @@ export default function UploadSuccess({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy', err);
+      console.error("Failed to copy", err);
     }
   };
 
   const showFallback = !meta?.icon || imageError;
+
+  /*
+   * NEW: Fetch session and config to show claim banner dynamically
+   */
+  const { data: user } = useUserSession();
+  const { data: config } = useAppConfig();
+
+  const getClaimText = () => {
+    if (!config) return { guest: "3 days", auth: "30 days" };
+
+    const hours = config.guestLinkExpiryHours;
+    const days = Math.ceil(hours / 24);
+
+    const guestExpiry =
+      hours >= 24
+        ? `${days} day${days !== 1 ? "s" : ""}`
+        : `${hours} hour${hours !== 1 ? "s" : ""}`;
+
+    const authExpiry =
+      config.buildDefaultExpiryDays === 0
+        ? "permanent"
+        : `${config.buildDefaultExpiryDays} days`;
+
+    return { guest: guestExpiry, auth: authExpiry };
+  };
+
+  const showClaimBanner = !user && config;
+  const claimInfo = getClaimText();
 
   return (
     <motion.div
@@ -84,47 +121,91 @@ export default function UploadSuccess({
 
       {/* App Metadata Card */}
       {meta && (
-        <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 max-w-md mx-auto flex items-center gap-4 text-left"
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 max-w-md mx-auto flex items-center gap-4 text-left"
         >
-            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10 shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
-                {/* Shimmer effect placeholder */}
-                {!imageLoaded && !showFallback && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-shimmer bg-[length:200%_100%] content-['']" />
-                )}
-                
-                {!showFallback ? (
-                    <div className="relative w-full h-full">
-                       <img 
-                          src={meta.icon} 
-                          alt={meta.name} 
-                          className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                          onLoad={() => setImageLoaded(true)}
-                          onError={() => { setImageError(true); setImageLoaded(true); }}
-                       />
-                    </div>
-                ) : (
-                    <div className={`w-full h-full flex items-center justify-center ${platform === 'ios' ? 'bg-slate-900' : 'bg-emerald-600'}`}>
-                         <img 
-                            src={platform === 'ios' ? "/images/logo/apple-logo-svgrepo-com.svg" : "/images/logo/android-logo-svgrepo-com.svg"} 
-                            alt={platform}
-                            className={`w-8 h-8 drop-shadow-md ${platform === 'ios' ? 'invert' : ''}`}
-                         />
-                    </div>
-                )}
+          <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10 shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+            {/* Shimmer effect placeholder */}
+            {!imageLoaded && !showFallback && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-shimmer bg-[length:200%_100%] content-['']" />
+            )}
+
+            {!showFallback ? (
+              <div className="relative w-full h-full">
+                <img
+                  src={meta.icon}
+                  alt={meta.name}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => {
+                    setImageError(true);
+                    setImageLoaded(true);
+                  }}
+                />
+              </div>
+            ) : (
+              <div
+                className={`w-full h-full flex items-center justify-center ${platform === "ios" ? "bg-slate-900" : "bg-emerald-600"}`}
+              >
+                <img
+                  src={
+                    platform === "ios"
+                      ? "/images/logo/apple-logo-svgrepo-com.svg"
+                      : "/images/logo/android-logo-svgrepo-com.svg"
+                  }
+                  alt={platform}
+                  className={`w-8 h-8 drop-shadow-md ${platform === "ios" ? "invert" : ""}`}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-white truncate leading-tight mb-1">
+              {meta.name}
+            </h3>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <span className="bg-white/10 px-1.5 py-0.5 rounded text-gray-300 font-mono">
+                  v{meta.version}
+                </span>
+                <span className="truncate opacity-70">{meta.package}</span>
+              </div>
             </div>
-            
-            <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold text-white truncate leading-tight mb-1">{meta.name}</h3>
-                <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-gray-300 font-mono">v{meta.version}</span>
-                        <span className="truncate opacity-70">{meta.package}</span>
-                    </div>
-                </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Claim Upload Banner - ONLY for guests */}
+      {showClaimBanner && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+          className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-2xl p-4 mb-8 max-w-md mx-auto text-left relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center justify-between relative z-10">
+            <div>
+              <h4 className="text-sm font-bold text-blue-200 mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                Extend Link Life
+              </h4>
+              <p className="text-[11px] sm:text-xs text-blue-300/70">
+                Guest links expire in {claimInfo.guest}. Sign in to keep it for{" "}
+                {claimInfo.auth}.
+              </p>
             </div>
+            <Button
+              size="sm"
+              variant="primary"
+              className="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 h-auto shrink-0 ml-4"
+              onClick={() => (window.location.href = "/login")}
+            >
+              Sign In
+            </Button>
+          </div>
         </motion.div>
       )}
 
@@ -139,12 +220,16 @@ export default function UploadSuccess({
             variant="ghost"
             onClick={handleCopy}
             className={`
-              ${copied ? 'text-green-400 bg-green-400/10' : 'text-gray-400 hover:text-white'}
+              ${copied ? "text-green-400 bg-green-400/10" : "text-gray-400 hover:text-white"}
               transition-colors
             `}
             title="Copy to clipboard"
           >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
           </Button>
           <a
             href={url}
@@ -169,10 +254,10 @@ export default function UploadSuccess({
             className="flex flex-col items-center gap-3 bg-white p-4 rounded-2xl shadow-lg"
           >
             <div className="relative w-full aspect-square max-w-[180px]">
-              <img 
-                src={qrCodeData} 
-                alt="Download QR Code" 
-                className="w-full h-full object-contain rounded-lg" 
+              <img
+                src={qrCodeData}
+                alt="Download QR Code"
+                className="w-full h-full object-contain rounded-lg"
               />
             </div>
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest flex items-center gap-2">
@@ -183,7 +268,9 @@ export default function UploadSuccess({
         )}
 
         {/* Action Buttons */}
-        <div className={`flex flex-col gap-4 ${!showQRCode ? 'col-span-2' : ''}`}>
+        <div
+          className={`flex flex-col gap-4 ${!showQRCode ? "col-span-2" : ""}`}
+        >
           <Button
             onClick={onUploadAnother}
             variant="outline"
@@ -192,18 +279,20 @@ export default function UploadSuccess({
             <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
             Upload Another Build
           </Button>
-          
+
           <Button
             onClick={() => {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Install App',
-                        text: 'Install this app build',
-                        url: url
-                    }).catch(console.error);
-                } else {
-                    handleCopy();
-                }
+              if (navigator.share) {
+                navigator
+                  .share({
+                    title: "Install App",
+                    text: "Install this app build",
+                    url: url,
+                  })
+                  .catch(console.error);
+              } else {
+                handleCopy();
+              }
             }}
             variant="secondary"
             className="w-full justify-center gap-2 py-6 text-base bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-none shadow-lg shadow-blue-500/25"
