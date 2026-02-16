@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { 
-  Fingerprint, 
-  Plus, 
-  Trash2, 
-  Shield, 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Fingerprint,
+  Plus,
+  Trash2,
+  Shield,
   ArrowLeft,
   Smartphone,
   Laptop,
@@ -17,30 +17,48 @@ import {
   Package,
   Link,
   Download,
-  Clock
-} from 'lucide-react';
-import Logo from '@/components/ui/Logo';
-import { getDeviceId } from '@/lib/device-id';
-import { fetchFromLaravel } from '@/lib/api-client';
-import { useUserSession, usePasskeys, useGuestUploads, type Passkey, type GuestUpload } from '@/hooks/queries';
+  Clock,
+} from "lucide-react";
+import Logo from "@/components/ui/Logo";
+import { getDeviceId } from "@/lib/device-id";
+import { fetchFromLaravel } from "@/lib/api-client";
+import {
+  useUserSession,
+  usePasskeys,
+  useGuestUploads,
+  type Passkey,
+  type GuestUpload,
+} from "@/hooks/queries";
+import { DataPrivacySection } from "@/components/compliance/DataPrivacySection";
 
 export default function SettingsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  
+
   const [isRegistering, setIsRegistering] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [claimingId, setClaimingId] = useState<string | null>(null);
-  const [claimToken, setClaimToken] = useState('');
+  const [claimToken, setClaimToken] = useState("");
   const [searchToken, setSearchToken] = useState<string | undefined>(undefined);
 
   // Use React Query hooks - prevents duplicate API calls
   const { data: user, isLoading: isLoadingUser } = useUserSession();
-  const { data: passkeys = [], isLoading: isLoadingPasskeys, refetch: refetchPasskeys } = usePasskeys();
-  
-  const deviceId = typeof window !== 'undefined' ? getDeviceId() : null;
-  const { data: guestData, isLoading: isLoadingGuest, refetch: refetchGuestUploads } = useGuestUploads(deviceId, searchToken);
-  
+  const {
+    data: passkeys = [],
+    isLoading: isLoadingPasskeys,
+    refetch: refetchPasskeys,
+  } = usePasskeys();
+
+  const deviceId = typeof window !== "undefined" ? getDeviceId() : null;
+  const {
+    data: guestData,
+    isLoading: isLoadingGuest,
+    refetch: refetchGuestUploads,
+  } = useGuestUploads(deviceId, searchToken);
+
   const guestUploads = guestData?.available || [];
   const claimedUploads = guestData?.claimed || [];
   const isLoading = isLoadingPasskeys;
@@ -48,41 +66,51 @@ export default function SettingsPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoadingUser && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isLoadingUser, user, router]);
 
   const claimGuestUpload = async (guestUploadId: string) => {
     setClaimingId(guestUploadId);
     setMessage(null);
-    
+
     try {
-      const data = await fetchFromLaravel<{ success: boolean; message?: string; error?: string }>('/api/guest/claim', {
-        method: 'POST',
+      const data = await fetchFromLaravel<{
+        success: boolean;
+        message?: string;
+        error?: string;
+      }>("/api/guest/claim", {
+        method: "POST",
         body: JSON.stringify({ guestUploadId }),
       });
 
       if (data.success) {
-        setMessage({ type: 'success', text: data.message || 'Upload claimed successfully!' });
+        setMessage({
+          type: "success",
+          text: data.message || "Upload claimed successfully!",
+        });
         refetchGuestUploads(); // Refresh the list
-        queryClient.invalidateQueries({ queryKey: ['builds'] });
-        queryClient.invalidateQueries({ queryKey: ['platform-stats'] });
+        queryClient.invalidateQueries({ queryKey: ["builds"] });
+        queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
         router.refresh();
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to claim upload' });
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to claim upload",
+        });
       }
     } catch (err) {
-      console.error('Failed to claim upload:', err);
-      setMessage({ type: 'error', text: 'Failed to claim upload' });
+      console.error("Failed to claim upload:", err);
+      setMessage({ type: "error", text: "Failed to claim upload" });
     } finally {
       setClaimingId(null);
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
   const handleClaimByToken = () => {
@@ -98,52 +126,81 @@ export default function SettingsPage() {
     try {
       // Check WebAuthn support
       if (!window.PublicKeyCredential) {
-        setMessage({ type: 'error', text: 'Your browser does not support passkeys.' });
+        setMessage({
+          type: "error",
+          text: "Your browser does not support passkeys.",
+        });
         return;
       }
 
       // Check if platform authenticator is available
-      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      const available =
+        await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
       if (!available) {
-        setMessage({ type: 'error', text: 'No passkey authenticator found on this device.' });
+        setMessage({
+          type: "error",
+          text: "No passkey authenticator found on this device.",
+        });
         return;
       }
 
       // Get registration options
-      const optionsData = await fetchFromLaravel<{ success: boolean; data: { options: any }; error?: string }>('/api/auth/passkey/register');
+      const optionsData = await fetchFromLaravel<{
+        success: boolean;
+        data: { options: any };
+        error?: string;
+      }>("/api/auth/passkey/register");
 
       if (!optionsData.success) {
-        setMessage({ type: 'error', text: optionsData.error || 'Failed to start registration' });
+        setMessage({
+          type: "error",
+          text: optionsData.error || "Failed to start registration",
+        });
         return;
       }
 
       const { options } = optionsData.data;
 
       // Start WebAuthn registration
-      const { startRegistration } = await import('@simplewebauthn/browser');
+      const { startRegistration } = await import("@simplewebauthn/browser");
       const regResponse = await startRegistration({ optionsJSON: options });
 
       // Verify with server
-      const verifyData = await fetchFromLaravel<{ success: boolean; error?: string }>('/api/auth/passkey/register', {
-        method: 'POST',
+      const verifyData = await fetchFromLaravel<{
+        success: boolean;
+        error?: string;
+      }>("/api/auth/passkey/register", {
+        method: "POST",
         body: JSON.stringify({ response: regResponse }),
       });
 
       if (!verifyData.success) {
-        setMessage({ type: 'error', text: verifyData.error || 'Registration failed' });
+        setMessage({
+          type: "error",
+          text: verifyData.error || "Registration failed",
+        });
         return;
       }
 
-      setMessage({ type: 'success', text: 'Passkey registered successfully! You can now use it to sign in.' });
+      setMessage({
+        type: "success",
+        text: "Passkey registered successfully! You can now use it to sign in.",
+      });
       refetchPasskeys();
     } catch (err: unknown) {
-      console.error('Passkey registration error:', err);
-      if (err instanceof Error && err.name === 'NotAllowedError') {
-        setMessage({ type: 'error', text: 'Registration was cancelled.' });
-      } else if (err instanceof Error && err.name === 'InvalidStateError') {
-        setMessage({ type: 'error', text: 'This passkey is already registered.' });
+      console.error("Passkey registration error:", err);
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setMessage({ type: "error", text: "Registration was cancelled." });
+      } else if (err instanceof Error && err.name === "InvalidStateError") {
+        setMessage({
+          type: "error",
+          text: "This passkey is already registered.",
+        });
       } else {
-        setMessage({ type: 'error', text: 'Failed to register passkey. Please try again.' });
+        setMessage({
+          type: "error",
+          text: "Failed to register passkey. Please try again.",
+        });
       }
     } finally {
       setIsRegistering(false);
@@ -151,37 +208,44 @@ export default function SettingsPage() {
   };
 
   const deletePasskey = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this passkey?')) return;
+    if (!confirm("Are you sure you want to delete this passkey?")) return;
 
     try {
-      const data = await fetchFromLaravel<{ success: boolean; error?: string }>(`/api/auth/passkey/register?id=${id}`, {
-        method: 'DELETE',
-      });
+      const data = await fetchFromLaravel<{ success: boolean; error?: string }>(
+        `/api/auth/passkey/register?id=${id}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (data.success) {
-        setMessage({ type: 'success', text: 'Passkey deleted successfully.' });
+        setMessage({ type: "success", text: "Passkey deleted successfully." });
         refetchPasskeys();
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to delete passkey' });
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to delete passkey",
+        });
       }
     } catch {
-      setMessage({ type: 'error', text: 'Failed to delete passkey' });
+      setMessage({ type: "error", text: "Failed to delete passkey" });
     }
   };
 
   const getDeviceIcon = (deviceType: string | null) => {
     if (!deviceType) return Key;
-    if (deviceType.includes('single') || deviceType === 'singleDevice') return Smartphone;
+    if (deviceType.includes("single") || deviceType === "singleDevice")
+      return Smartphone;
     return Laptop;
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -191,7 +255,10 @@ export default function SettingsPage() {
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-[0.05]" />
         <div className="bg-blob bg-blob-1 animate-float opacity-20" />
-        <div className="bg-blob bg-blob-2 animate-float opacity-20" style={{ animationDelay: '2s' }} />
+        <div
+          className="bg-blob bg-blob-2 animate-float opacity-20"
+          style={{ animationDelay: "2s" }}
+        />
       </div>
 
       {/* Header */}
@@ -200,7 +267,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push("/dashboard")}
                 className="p-2 rounded-lg hover:bg-white/5 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-white/70" />
@@ -221,17 +288,21 @@ export default function SettingsPage() {
         {message && (
           <div
             className={`mb-6 rounded-xl p-4 flex items-start gap-3 ${
-              message.type === 'success'
-                ? 'bg-emerald-500/10 border border-emerald-500/30'
-                : 'bg-red-500/10 border border-red-500/30'
+              message.type === "success"
+                ? "bg-emerald-500/10 border border-emerald-500/30"
+                : "bg-red-500/10 border border-red-500/30"
             }`}
           >
-            {message.type === 'success' ? (
+            {message.type === "success" ? (
               <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
             ) : (
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
             )}
-            <p className={message.type === 'success' ? 'text-emerald-400' : 'text-red-400'}>
+            <p
+              className={
+                message.type === "success" ? "text-emerald-400" : "text-red-400"
+              }
+            >
               {message.text}
             </p>
           </div>
@@ -247,7 +318,9 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-white">Passkeys</h2>
-                  <p className="text-sm text-white/50">Sign in with fingerprint, Face ID, or security key</p>
+                  <p className="text-sm text-white/50">
+                    Sign in with fingerprint, Face ID, or security key
+                  </p>
                 </div>
               </div>
               <button
@@ -257,9 +330,24 @@ export default function SettingsPage() {
               >
                 {isRegistering ? (
                   <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     <span>Registering...</span>
                   </>
@@ -283,9 +371,12 @@ export default function SettingsPage() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
                   <Shield className="w-8 h-8 text-white/30" />
                 </div>
-                <h3 className="text-white font-medium mb-2">No passkeys registered</h3>
+                <h3 className="text-white font-medium mb-2">
+                  No passkeys registered
+                </h3>
                 <p className="text-white/50 text-sm max-w-sm mx-auto">
-                  Add a passkey to sign in faster and more securely using your fingerprint, Face ID, or security key.
+                  Add a passkey to sign in faster and more securely using your
+                  fingerprint, Face ID, or security key.
                 </p>
               </div>
             ) : (
@@ -303,11 +394,14 @@ export default function SettingsPage() {
                         </div>
                         <div>
                           <p className="text-white font-medium">
-                            {passkey.deviceType === 'singleDevice' ? 'This Device' : 'Synced Passkey'}
+                            {passkey.deviceType === "singleDevice"
+                              ? "This Device"
+                              : "Synced Passkey"}
                           </p>
                           <p className="text-sm text-white/50">
                             Added {formatDate(passkey.createdAt)}
-                            {passkey.lastUsedAt && ` • Last used ${formatDate(passkey.lastUsedAt)}`}
+                            {passkey.lastUsedAt &&
+                              ` • Last used ${formatDate(passkey.lastUsedAt)}`}
                           </p>
                         </div>
                       </div>
@@ -334,8 +428,12 @@ export default function SettingsPage() {
                 <Package className="w-5 h-5 text-orange-400" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Claim Guest Uploads</h2>
-                <p className="text-sm text-white/50">Convert guest uploads to full builds with analytics</p>
+                <h2 className="text-lg font-semibold text-white">
+                  Claim Guest Uploads
+                </h2>
+                <p className="text-sm text-white/50">
+                  Convert guest uploads to full builds with analytics
+                </p>
               </div>
             </div>
           </div>
@@ -375,9 +473,12 @@ export default function SettingsPage() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
                   <Package className="w-8 h-8 text-white/30" />
                 </div>
-                <h3 className="text-white font-medium mb-2">No guest uploads available</h3>
+                <h3 className="text-white font-medium mb-2">
+                  No guest uploads available
+                </h3>
                 <p className="text-white/50 text-sm max-w-sm mx-auto">
-                  If you uploaded files as a guest, paste the share link token above to find and claim them.
+                  If you uploaded files as a guest, paste the share link token
+                  above to find and claim them.
                 </p>
               </div>
             ) : (
@@ -385,7 +486,9 @@ export default function SettingsPage() {
                 {/* Available to Claim */}
                 {guestUploads.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-white/70 mb-3">Available to Claim</h3>
+                    <h3 className="text-sm font-medium text-white/70 mb-3">
+                      Available to Claim
+                    </h3>
                     <div className="space-y-3">
                       {guestUploads.map((upload) => (
                         <div
@@ -393,38 +496,48 @@ export default function SettingsPage() {
                           className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:border-orange-500/30 transition-colors"
                         >
                           <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              upload.file_type === 'ipa' 
-                                ? 'bg-blue-500/20' 
-                                : 'bg-green-500/20'
-                            }`}>
-                              <span className={`text-sm font-bold ${
-                                upload.file_type === 'ipa' 
-                                  ? 'text-blue-400' 
-                                  : 'text-green-400'
-                              }`}>
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                upload.file_type === "ipa"
+                                  ? "bg-blue-500/20"
+                                  : "bg-green-500/20"
+                              }`}
+                            >
+                              <span
+                                className={`text-sm font-bold ${
+                                  upload.file_type === "ipa"
+                                    ? "text-blue-400"
+                                    : "text-green-400"
+                                }`}
+                              >
                                 {upload.file_type.toUpperCase()}
                               </span>
                             </div>
                             <div>
-                              <p className="text-white font-medium">{upload.app_name}</p>
+                              <p className="text-white font-medium">
+                                {upload.app_name}
+                              </p>
                               <div className="flex items-center gap-3 text-sm text-white/50">
                                 <span>v{upload.version}</span>
                                 <span>•</span>
                                 <span>{formatFileSize(upload.file_size)}</span>
-                                {upload.download_count !== undefined && upload.download_count > 0 && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="flex items-center gap-1">
-                                      <Download className="w-3 h-3" />
-                                      {upload.download_count}
-                                    </span>
-                                  </>
-                                )}
+                                {upload.download_count !== undefined &&
+                                  upload.download_count > 0 && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="flex items-center gap-1">
+                                        <Download className="w-3 h-3" />
+                                        {upload.download_count}
+                                      </span>
+                                    </>
+                                  )}
                                 <span>•</span>
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
-                                  Expires {new Date(upload.expires_at).toLocaleDateString()}
+                                  Expires{" "}
+                                  {new Date(
+                                    upload.expires_at,
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>
@@ -436,14 +549,29 @@ export default function SettingsPage() {
                           >
                             {claimingId === upload.id ? (
                               <>
-                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                <svg
+                                  className="animate-spin h-4 w-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  />
                                 </svg>
                                 Claiming...
                               </>
                             ) : (
-                              'Claim'
+                              "Claim"
                             )}
                           </button>
                         </div>
@@ -454,8 +582,10 @@ export default function SettingsPage() {
 
                 {/* Already Claimed */}
                 {claimedUploads.length > 0 && (
-                  <div className={guestUploads.length > 0 ? 'mt-6' : ''}>
-                    <h3 className="text-sm font-medium text-white/70 mb-3">Already Claimed</h3>
+                  <div className={guestUploads.length > 0 ? "mt-6" : ""}>
+                    <h3 className="text-sm font-medium text-white/70 mb-3">
+                      Already Claimed
+                    </h3>
                     <div className="space-y-3">
                       {claimedUploads.map((upload) => (
                         <div
@@ -463,21 +593,27 @@ export default function SettingsPage() {
                           className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-emerald-500/20"
                         >
                           <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              upload.file_type === 'ipa' 
-                                ? 'bg-blue-500/20' 
-                                : 'bg-green-500/20'
-                            }`}>
-                              <span className={`text-sm font-bold ${
-                                upload.file_type === 'ipa' 
-                                  ? 'text-blue-400' 
-                                  : 'text-green-400'
-                              }`}>
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                upload.file_type === "ipa"
+                                  ? "bg-blue-500/20"
+                                  : "bg-green-500/20"
+                              }`}
+                            >
+                              <span
+                                className={`text-sm font-bold ${
+                                  upload.file_type === "ipa"
+                                    ? "text-blue-400"
+                                    : "text-green-400"
+                                }`}
+                              >
                                 {upload.file_type.toUpperCase()}
                               </span>
                             </div>
                             <div>
-                              <p className="text-white font-medium">{upload.app_name}</p>
+                              <p className="text-white font-medium">
+                                {upload.app_name}
+                              </p>
                               <div className="flex items-center gap-3 text-sm text-white/50">
                                 <span>v{upload.version}</span>
                                 <span>•</span>
@@ -510,18 +646,37 @@ export default function SettingsPage() {
               <ul className="text-sm text-white/60 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="text-primary-400 mt-1">•</span>
-                  <span>Passkeys are a modern, phishing-resistant alternative to passwords</span>
+                  <span>
+                    Passkeys are a modern, phishing-resistant alternative to
+                    passwords
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary-400 mt-1">•</span>
-                  <span>They use your device&apos;s biometrics (fingerprint, Face ID) or a security key</span>
+                  <span>
+                    They use your device&apos;s biometrics (fingerprint, Face
+                    ID) or a security key
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary-400 mt-1">•</span>
-                  <span>Synced passkeys work across your devices via iCloud Keychain, Google Password Manager, etc.</span>
+                  <span>
+                    Synced passkeys work across your devices via iCloud
+                    Keychain, Google Password Manager, etc.
+                  </span>
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Data & Privacy Section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Data & Privacy
+          </h2>
+          <div className="space-y-4">
+            {user && <DataPrivacySection user={user} />}
           </div>
         </div>
       </main>

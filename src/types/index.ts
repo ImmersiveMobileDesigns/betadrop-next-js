@@ -1,19 +1,21 @@
 // Core types for BetaDrop
 
-export type UserRole = 'admin' | 'viewer';
-export type Platform = 'ios' | 'android';
-export type ExpiryType = 'none' | 'time' | 'downloads' | 'devices' | 'combined';
-export type LinkType = 'qa' | 'stakeholder' | 'beta_tester' | 'reviewer';
-export type FeedbackType = 'bug' | 'suggestion' | 'question' | 'other';
-export type FeedbackSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type FeedbackStatus = 'new' | 'acknowledged' | 'resolved' | 'wont_fix';
-export type InstallStatus = 'success' | 'failure' | 'pending';
+export type UserRole = "admin" | "viewer";
+export type Platform = "ios" | "android";
+export type ExpiryType = "none" | "time" | "downloads" | "devices" | "combined";
+export type LinkType = "qa" | "stakeholder" | "beta_tester" | "reviewer";
+export type FeedbackType = "bug" | "suggestion" | "question" | "other";
+export type FeedbackSeverity = "low" | "medium" | "high" | "critical";
+export type FeedbackStatus = "new" | "acknowledged" | "resolved" | "wont_fix";
+export type InstallStatus = "success" | "failure" | "pending";
 
 // Database Models
 export interface User {
   id: string;
   email: string;
   role: UserRole;
+  accepted_tos_at: string | null;
+  tos_version: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -36,7 +38,7 @@ export interface Build {
   download_count: number;
   created_at: Date;
   updated_at: Date;
-  
+
   // Advanced features
   expiry_type: ExpiryType;
   expiry_time_days: number | null;
@@ -52,21 +54,21 @@ export interface Build {
   unique_devices_count: number;
   install_success_count: number;
   install_failure_count: number;
-  
+
   // Custom Branding
   custom_brand_name: string | null;
-  custom_theme_mode: 'dark' | 'light' | 'system';
+  custom_theme_mode: "dark" | "light" | "system";
   custom_background_color: string | null;
   hide_platform_branding: boolean;
   provisioned_devices?: string[];
   permissions?: string[];
   device_families?: string[];
   min_os_version?: string | null;
-  
+
   // Relations
   share_links?: ShareLink[];
   analytics?: BuildAnalytics[];
-  
+
   // Derived columns (not in DB table)
   default_short_id?: string;
   icon_url?: string | null;
@@ -218,7 +220,7 @@ export interface UpdateBuildRequest {
   custom_message?: string;
   custom_logo_path?: string | null;
   custom_brand_name?: string | null;
-  custom_theme_mode?: 'dark' | 'light' | 'system';
+  custom_theme_mode?: "dark" | "light" | "system";
   custom_background_color?: string | null;
   hide_platform_branding?: boolean;
   is_deprecated?: boolean;
@@ -245,8 +247,6 @@ export interface CreateFeedbackRequest {
   rating?: number;
 }
 
-
-
 export interface ClaimGuestUploadRequest {
   guest_upload_id: string;
 }
@@ -269,7 +269,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 // Device Detection
-export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+export type DeviceType = "mobile" | "tablet" | "desktop";
 
 export interface DeviceInfo {
   type: DeviceType;

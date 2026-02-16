@@ -1,6 +1,18 @@
-import { useQuery, useMutation, UseQueryOptions, useQueryClient } from '@tanstack/react-query';
-import { fetchFromLaravel } from '@/lib/api-client';
-import { User, ApiResponse, Build, ShareLink, BuildFeedback, BuildAnalyticsSummary } from '@/types';
+import {
+  useQuery,
+  useMutation,
+  UseQueryOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { fetchFromLaravel } from "@/lib/api-client";
+import {
+  User,
+  ApiResponse,
+  Build,
+  ShareLink,
+  BuildFeedback,
+  BuildAnalyticsSummary,
+} from "@/types";
 
 // Constants
 const STALE_TIME = 2 * 60 * 1000; // 2 minutes stale time
@@ -14,7 +26,7 @@ interface Config {
 
 interface UploadResponse {
   id: string;
-  url: string; 
+  url: string;
   shortId?: string;
   expiresAt?: string;
 }
@@ -29,7 +41,7 @@ interface Passkey {
 interface GuestUpload {
   id: string;
   token: string;
-  file_type: 'ipa' | 'apk';
+  file_type: "ipa" | "apk";
   app_name: string;
   package_name: string;
   version: string;
@@ -40,7 +52,7 @@ interface GuestUpload {
 }
 
 interface InstallDataBuild {
-  type: 'build';
+  type: "build";
   build: Build;
   shareLink: ShareLink | null;
   defaultShortId: string | null;
@@ -50,13 +62,13 @@ interface InstallDataBuild {
 }
 
 interface InstallDataGuest {
-  type: 'guest';
+  type: "guest";
   id: string;
   shortId: string | null;
   appName: string;
   packageName: string;
   version: string;
-  fileType: 'ipa' | 'apk';
+  fileType: "ipa" | "apk";
   fileSize: number;
   createdAt: string;
   expiresAt?: string;
@@ -76,7 +88,7 @@ interface GuestAppData {
   appName: string;
   packageName: string;
   version: string;
-  fileType: 'ipa' | 'apk';
+  fileType: "ipa" | "apk";
   fileSize: number;
   createdAt: string;
   expiresAt?: string;
@@ -100,11 +112,16 @@ interface PlatformStats {
 // ========================================
 
 // 1. User Session
-export const useUserSession = (options?: Omit<UseQueryOptions<User | null>, 'queryKey' | 'queryFn'>) => {
+export const useUserSession = (
+  options?: Omit<UseQueryOptions<User | null>, "queryKey" | "queryFn">,
+) => {
   return useQuery({
-    queryKey: ['session'],
+    queryKey: ["session"],
     queryFn: async () => {
-      const response = await fetchFromLaravel<ApiResponse<{ user: User | null }>>('/api/auth/session');
+      const response =
+        await fetchFromLaravel<ApiResponse<{ user: User | null }>>(
+          "/api/auth/session",
+        );
       if (response.success && response.data?.user) {
         return response.data.user;
       }
@@ -118,13 +135,14 @@ export const useUserSession = (options?: Omit<UseQueryOptions<User | null>, 'que
 // 2. App Config
 export const useAppConfig = () => {
   return useQuery({
-    queryKey: ['config'],
+    queryKey: ["config"],
     queryFn: async () => {
-      const response = await fetchFromLaravel<ApiResponse<Config>>('/api/config');
+      const response =
+        await fetchFromLaravel<ApiResponse<Config>>("/api/config");
       if (response.success && response.data) {
         return response.data;
       }
-      throw new Error('Failed to load configuration');
+      throw new Error("Failed to load configuration");
     },
     staleTime: 1000 * 60 * 60, // 1 hour for config
   });
@@ -133,35 +151,35 @@ export const useAppConfig = () => {
 // 3. Platform Stats (home page)
 export const usePlatformStats = () => {
   return useQuery({
-    queryKey: ['platform-stats'],
+    queryKey: ["platform-stats"],
     queryFn: async () => {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(`${apiBase}/api/stats/counter`, {
-        headers: { 'Accept': 'application/json' },
-        credentials: 'include',
+        headers: { Accept: "application/json" },
+        credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
-      
+
       const json = await response.json();
-      
+
       if (json.success && json.data) {
         return {
           totalUploads: Number(json.data.totalUploads) || 0,
           totalDownloads: Number(json.data.totalDownloads) || 0,
           totalDevelopers: Number(json.data.totalDevelopers) || 0,
-          uptime: json.data.uptime || '99.9%',
+          uptime: json.data.uptime || "99.9%",
         } as PlatformStats;
       }
-      
+
       // Return default stats if API fails
       return {
         totalUploads: 0,
         totalDownloads: 0,
         totalDevelopers: 0,
-        uptime: '99.9%',
+        uptime: "99.9%",
       } as PlatformStats;
     },
     staleTime: STALE_TIME,
@@ -184,45 +202,52 @@ export interface PaginatedResponse<T> {
 }
 
 export interface BuildsResponse {
-    builds: PaginatedResponse<Build>;
-    stats: {
-        total_builds: number;
-        total_downloads: number;
-        total_size: number;
-    };
+  builds: PaginatedResponse<Build>;
+  stats: {
+    total_builds: number;
+    total_downloads: number;
+    total_size: number;
+  };
 }
 
 // 4. User Builds List
-export const useBuilds = (enabled: boolean = true, page: number = 1, filter: 'all' | 'ios' | 'android' = 'all') => {
+export const useBuilds = (
+  enabled: boolean = true,
+  page: number = 1,
+  filter: "all" | "ios" | "android" = "all",
+) => {
   return useQuery({
-    queryKey: ['builds', page, filter],
+    queryKey: ["builds", page, filter],
     queryFn: async () => {
       const queryParams = new URLSearchParams();
-      queryParams.set('page', page.toString());
-      
-      if (filter !== 'all') {
-        queryParams.set('platform', filter);
+      queryParams.set("page", page.toString());
+
+      if (filter !== "all") {
+        queryParams.set("platform", filter);
       }
 
-      const response = await fetchFromLaravel<{ success: boolean; data: BuildsResponse }>(`/api/builds?${queryParams.toString()}`);
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: BuildsResponse;
+      }>(`/api/builds?${queryParams.toString()}`);
       if (response.success && response.data) {
         return response.data;
       }
       return {
-          builds: { 
-            data: [], 
-            current_page: 1, 
-            last_page: 1, 
-            per_page: 10, 
-            total: 0, 
-            from: 0,
-            to: 0,
-            first_page_url: '', 
-            last_page_url: '', 
-            next_page_url: null, 
-            prev_page_url: null 
-          },
-          stats: { total_builds: 0, total_downloads: 0, total_size: 0 }
+        builds: {
+          data: [],
+          current_page: 1,
+          last_page: 1,
+          per_page: 10,
+          total: 0,
+          from: 0,
+          to: 0,
+          first_page_url: "",
+          last_page_url: "",
+          next_page_url: null,
+          prev_page_url: null,
+        },
+        stats: { total_builds: 0, total_downloads: 0, total_size: 0 },
       };
     },
     staleTime: STALE_TIME,
@@ -234,14 +259,17 @@ export const useBuilds = (enabled: boolean = true, page: number = 1, filter: 'al
 // 4. Single Build Details
 export const useBuild = (buildId: string | null) => {
   return useQuery({
-    queryKey: ['build', buildId],
+    queryKey: ["build", buildId],
     queryFn: async () => {
-      if (!buildId) throw new Error('Build ID is required');
-      const response = await fetchFromLaravel<{ success: boolean; data: { build: Build } }>(`/api/builds/${buildId}`);
+      if (!buildId) throw new Error("Build ID is required");
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: { build: Build };
+      }>(`/api/builds/${buildId}`);
       if (response.success && response.data?.build) {
         return response.data.build;
       }
-      throw new Error('Build not found');
+      throw new Error("Build not found");
     },
     staleTime: STALE_TIME,
     enabled: !!buildId,
@@ -251,13 +279,16 @@ export const useBuild = (buildId: string | null) => {
 // 5. Build Analytics
 export const useBuildAnalytics = (buildId: string) => {
   return useQuery({
-    queryKey: ['build-analytics', buildId],
+    queryKey: ["build-analytics", buildId],
     queryFn: async () => {
-      const response = await fetchFromLaravel<{ success: boolean; data: { summary: BuildAnalyticsSummary } }>(`/api/builds/${buildId}/analytics`);
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: { summary: BuildAnalyticsSummary };
+      }>(`/api/builds/${buildId}/analytics`);
       if (response.success && response.data?.summary) {
         return response.data.summary;
       }
-      throw new Error('Failed to load analytics');
+      throw new Error("Failed to load analytics");
     },
     staleTime: STALE_TIME,
     enabled: !!buildId,
@@ -267,9 +298,12 @@ export const useBuildAnalytics = (buildId: string) => {
 // 6. Build Share Links
 export const useBuildShareLinks = (buildId: string) => {
   return useQuery({
-    queryKey: ['build-share-links', buildId],
+    queryKey: ["build-share-links", buildId],
     queryFn: async () => {
-      const response = await fetchFromLaravel<{ success: boolean; data: ShareLink[] }>(`/api/builds/${buildId}/share-links`);
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: ShareLink[];
+      }>(`/api/builds/${buildId}/share-links`);
       if (response.success && response.data) {
         return response.data;
       }
@@ -283,9 +317,12 @@ export const useBuildShareLinks = (buildId: string) => {
 // 7. Build Feedback
 export const useBuildFeedback = (buildId: string) => {
   return useQuery({
-    queryKey: ['build-feedback', buildId],
+    queryKey: ["build-feedback", buildId],
     queryFn: async () => {
-      const response = await fetchFromLaravel<{ success: boolean; data: BuildFeedback[] }>(`/api/builds/${buildId}/feedback`);
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: BuildFeedback[];
+      }>(`/api/builds/${buildId}/feedback`);
       if (response.success && response.data) {
         return response.data;
       }
@@ -299,30 +336,30 @@ export const useBuildFeedback = (buildId: string) => {
 // 8. Install Page Data
 export const useInstallData = (id: string | null, token: string | null) => {
   return useQuery({
-    queryKey: ['install', id, token],
+    queryKey: ["install", id, token],
     queryFn: async () => {
-      if (!id) throw new Error('ID is required');
+      if (!id) throw new Error("ID is required");
       const queryParams = new URLSearchParams();
-      if (token) queryParams.set('token', token);
-      
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
-      const url = `${apiBase}/api/install/${id}${queryParams.toString() ? `?${queryParams}` : ''}`;
-      
+      if (token) queryParams.set("token", token);
+
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+      const url = `${apiBase}/api/install/${id}${queryParams.toString() ? `?${queryParams}` : ""}`;
+
       const response = await fetch(url, {
-        headers: { 'Accept': 'application/json' },
-        credentials: 'include',
+        headers: { Accept: "application/json" },
+        credentials: "include",
       });
-      
+
       const json = await response.json();
-      
+
       if (!response.ok) {
-        throw { 
-          reason: json.reason || 'not_found', 
+        throw {
+          reason: json.reason || "not_found",
           appName: json.appName,
-          status: response.status 
+          status: response.status,
         };
       }
-      
+
       return json.data as InstallData;
     },
     staleTime: STALE_TIME,
@@ -334,26 +371,26 @@ export const useInstallData = (id: string | null, token: string | null) => {
 // 9. Guest App Data
 export const useGuestAppData = (token: string | null) => {
   return useQuery({
-    queryKey: ['guest-app', token],
+    queryKey: ["guest-app", token],
     queryFn: async () => {
-      if (!token) throw new Error('Token is required');
-      
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
+      if (!token) throw new Error("Token is required");
+
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(`${apiBase}/api/guest/app/${token}`, {
-        headers: { 'Accept': 'application/json' },
-        credentials: 'include',
+        headers: { Accept: "application/json" },
+        credentials: "include",
       });
-      
-      if (response.status === 410) throw new Error('Link Expired');
-      if (response.status === 404) throw new Error('App Not Found');
-      if (!response.ok) throw new Error('Failed to load');
-      
+
+      if (response.status === 410) throw new Error("Link Expired");
+      if (response.status === 404) throw new Error("App Not Found");
+      if (!response.ok) throw new Error("Failed to load");
+
       const json = await response.json();
-      
+
       if (json.success) {
         return json.data as GuestAppData;
       }
-      throw new Error(json.error || 'Failed to load app data');
+      throw new Error(json.error || "Failed to load app data");
     },
     staleTime: STALE_TIME,
     enabled: !!token,
@@ -364,9 +401,12 @@ export const useGuestAppData = (token: string | null) => {
 // 10. Passkeys List
 export const usePasskeys = () => {
   return useQuery({
-    queryKey: ['passkeys'],
+    queryKey: ["passkeys"],
     queryFn: async () => {
-      const response = await fetchFromLaravel<{ success: boolean; data: { passkeys: Passkey[] } }>('/api/auth/passkey/register?action=list');
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: { passkeys: Passkey[] };
+      }>("/api/auth/passkey/register?action=list");
       if (response.success && response.data?.passkeys) {
         return response.data.passkeys;
       }
@@ -377,17 +417,23 @@ export const usePasskeys = () => {
 };
 
 // 11. Guest Uploads for Claiming
-export const useGuestUploads = (deviceId: string | null, claimToken?: string) => {
+export const useGuestUploads = (
+  deviceId: string | null,
+  claimToken?: string,
+) => {
   return useQuery({
-    queryKey: ['guest-uploads', deviceId, claimToken],
+    queryKey: ["guest-uploads", deviceId, claimToken],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (claimToken) params.set('claimToken', claimToken);
-      if (deviceId) params.set('deviceId', deviceId);
-      
-      const path = `/api/guest/claim${params.toString() ? `?${params.toString()}` : ''}`;
-      const response = await fetchFromLaravel<{ success: boolean; data: { available: GuestUpload[]; claimed: GuestUpload[] } }>(path);
-      
+      if (claimToken) params.set("claimToken", claimToken);
+      if (deviceId) params.set("deviceId", deviceId);
+
+      const path = `/api/guest/claim${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await fetchFromLaravel<{
+        success: boolean;
+        data: { available: GuestUpload[]; claimed: GuestUpload[] };
+      }>(path);
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -403,15 +449,17 @@ export const useGuestUploads = (deviceId: string | null, claimToken?: string) =>
 
 // Upload Mutation Helper - returns a promise but allows progress tracking via callback
 const uploadFile = async (
-  endpoint: string, 
-  formData: FormData, 
-  onProgress?: (progress: number) => void
+  endpoint: string,
+  formData: FormData,
+  onProgress?: (progress: number) => void,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
     // Ensure endpoint starts with slash and handle base url
-    const url = endpoint.startsWith('http') ? endpoint : `${apiBase}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const url = endpoint.startsWith("http")
+      ? endpoint
+      : `${apiBase}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -424,24 +472,24 @@ const uploadFile = async (
         try {
           resolve(JSON.parse(xhr.responseText));
         } catch {
-          reject('Invalid response');
+          reject("Invalid response");
         }
       } else {
         try {
           const res = JSON.parse(xhr.responseText);
-          reject(res.error || 'Upload failed');
+          reject(res.error || "Upload failed");
         } catch {
-          reject('Upload failed');
+          reject("Upload failed");
         }
       }
     };
 
-    xhr.onerror = () => reject('Network error');
-    
-    xhr.open('POST', url);
+    xhr.onerror = () => reject("Network error");
+
+    xhr.open("POST", url);
     xhr.withCredentials = true;
     // Tell Laravel to respond with JSON (important for error responses)
-    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader("Accept", "application/json");
     xhr.send(formData);
   });
 };
@@ -450,15 +498,25 @@ const uploadFile = async (
 export const useGuestUpload = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ formData, onProgress }: { formData: FormData; onProgress?: (p: number) => void }) => {
-      const response = await uploadFile('/api/guest/upload', formData, onProgress);
+    mutationFn: async ({
+      formData,
+      onProgress,
+    }: {
+      formData: FormData;
+      onProgress?: (p: number) => void;
+    }) => {
+      const response = await uploadFile(
+        "/api/guest/upload",
+        formData,
+        onProgress,
+      );
       if (response.success && response.data) {
         return response.data;
       }
-      throw new Error(response.error || 'Upload failed');
+      throw new Error(response.error || "Upload failed");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guest-uploads'] });
+      queryClient.invalidateQueries({ queryKey: ["guest-uploads"] });
     },
   });
 };
@@ -467,16 +525,22 @@ export const useGuestUpload = () => {
 export const useAuthUpload = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ formData, onProgress }: { formData: FormData; onProgress?: (p: number) => void }) => {
-      const response = await uploadFile('/api/upload', formData, onProgress);
+    mutationFn: async ({
+      formData,
+      onProgress,
+    }: {
+      formData: FormData;
+      onProgress?: (p: number) => void;
+    }) => {
+      const response = await uploadFile("/api/upload", formData, onProgress);
       if (response.success && response.data) {
         return response.data;
       }
-      throw new Error(response.error || 'Upload failed');
+      throw new Error(response.error || "Upload failed");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['builds'] });
-      queryClient.invalidateQueries({ queryKey: ['platform-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["builds"] });
+      queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
     },
   });
 };
@@ -486,35 +550,140 @@ export const useUpdateBuild = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(`${apiBase}/api/builds/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(updates),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || errorData.error || 'Failed to update build');
+        throw new Error(
+          errorData.message || errorData.error || "Failed to update build",
+        );
       }
-      
+
       const data = await response.json();
       if (data.success && data.data) {
         return data.data as Build;
       }
-      throw new Error('Failed to update build');
+      throw new Error("Failed to update build");
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['build', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['builds'] });
-      queryClient.invalidateQueries({ queryKey: ['platform-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["build", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["builds"] });
+      queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
     },
   });
 };
 
+// ========================================
+// Compliance Hooks
+// ========================================
+
+// Accept Terms of Service
+export const useAcceptTos = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (version: string) => {
+      const response = await fetchFromLaravel<
+        ApiResponse<{ accepted_tos_at: string; tos_version: string }>
+      >("/api/user/accept-tos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ version }),
+      });
+      if (response.success) {
+        return response.data;
+      }
+      throw new Error("Failed to accept terms");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["session"] });
+    },
+  });
+};
+
+// Export User Data (GDPR Article 15)
+export const useExportUserData = () => {
+  return useMutation({
+    mutationFn: async () => {
+      const response =
+        await fetchFromLaravel<ApiResponse<Record<string, unknown>>>(
+          "/api/user/data",
+        );
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error("Failed to export data");
+    },
+  });
+};
+
+// Delete Account (GDPR Article 17)
+export const useDeleteAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (confirmEmail: string) => {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+      const response = await fetch(`${apiBase}/api/user/data`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ confirm_email: confirmEmail }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["session"] });
+    },
+  });
+};
+
+// Legal Content (Privacy Policy & Terms of Service)
+export const useLegalContent = (type: "privacy" | "tos") => {
+  return useQuery({
+    queryKey: ["legal", type],
+    queryFn: async () => {
+      const response = await fetchFromLaravel<
+        ApiResponse<{
+          title: string;
+          lastUpdated: string;
+          sections: Array<{
+            id: string;
+            title: string;
+            content: string | string[];
+          }>;
+        }>
+      >(`/api/legal/${type}`);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(`Failed to load ${type} content`);
+    },
+    staleTime: 1000 * 60 * 60, // 1 hour — legal text changes infrequently
+  });
+};
+
 // Export types for use in components
-export type { Config, UploadResponse, Passkey, GuestUpload, InstallData, GuestAppData, PlatformStats };
+export type {
+  Config,
+  UploadResponse,
+  Passkey,
+  GuestUpload,
+  InstallData,
+  GuestAppData,
+  PlatformStats,
+};
