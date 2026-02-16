@@ -178,7 +178,7 @@ export default function FileUploadZone({
         </div>
 
         {isUploading && (
-          <div className="absolute inset-x-12 bottom-12">
+          <div className="w-full max-w-xs mt-4 relative z-20 mx-auto">
             <div className="flex justify-between text-xs text-blue-400 font-medium mb-2 uppercase tracking-wider">
               <span>Uploading</span>
               <span>{Math.round(uploadProgress)}%</span>

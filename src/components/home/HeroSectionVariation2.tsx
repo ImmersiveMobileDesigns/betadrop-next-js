@@ -6,7 +6,13 @@ import GuestUpload from "@/components/guest/GuestUpload";
 import FeatureMap from "@/components/home/FeatureMap";
 import DeveloperFeatures from "@/components/home/DeveloperFeatures";
 
-export default function HeroSectionVariation2() {
+interface HeroSectionProps {
+  droppedFile?: File | null;
+}
+
+export default function HeroSectionVariation2({
+  droppedFile,
+}: HeroSectionProps) {
   return (
     <section
       className="relative pt-32 pb-10 px-4 z-10 overflow-visible"
@@ -38,7 +44,7 @@ export default function HeroSectionVariation2() {
           delay={100}
           threshold={0.2}
         >
-          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 tracking-tighter leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-8 tracking-tighter leading-[1.1]">
             Ship Apps{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 animate-shimmer bg-[length:200%_auto]">
               Faster
@@ -110,11 +116,9 @@ export default function HeroSectionVariation2() {
           className="mb-20"
         >
           <FeatureMap>
-            <GuestUpload />
+            <GuestUpload droppedFile={droppedFile} />
           </FeatureMap>
         </AnimateOnScroll>
-
-        <DeveloperFeatures />
       </div>
     </section>
   );

@@ -38,11 +38,14 @@ export default function UploadSuccess({
   description,
   platform = "android",
   meta,
-}: UploadSuccessProps) {
+  size = "default",
+}: UploadSuccessProps & { size?: "default" | "compact" }) {
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  const isCompact = size === "compact";
 
   useEffect(() => {
     if (showQRCode && url) {
@@ -103,19 +106,35 @@ export default function UploadSuccess({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="p-8 sm:p-12 text-center"
+      className={`${isCompact ? "p-6" : "p-8 sm:p-12"} text-center`}
     >
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        className="w-20 h-20 bg-gradient-to-tr from-green-400 to-emerald-600 rounded-full mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+        className={`${
+          isCompact ? "w-12 h-12 mb-4" : "w-20 h-20 mb-6"
+        } bg-gradient-to-tr from-green-400 to-emerald-600 rounded-full mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.4)]`}
       >
-        <Check className="w-10 h-10 text-white stroke-[3]" />
+        <Check
+          className={`${
+            isCompact ? "w-6 h-6 stroke-2" : "w-10 h-10 stroke-[3]"
+          } text-white`}
+        />
       </motion.div>
 
-      <h2 className="text-3xl font-bold text-white mb-2">Upload Successful!</h2>
-      <p className="text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
+      <h2
+        className={`${
+          isCompact ? "text-xl" : "text-3xl"
+        } font-bold text-white mb-2`}
+      >
+        Upload Successful!
+      </h2>
+      <p
+        className={`text-gray-400 ${
+          isCompact ? "text-sm mb-6" : "mb-8 text-base"
+        } max-w-lg mx-auto leading-relaxed`}
+      >
         {description}
       </p>
 
@@ -124,9 +143,15 @@ export default function UploadSuccess({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 max-w-md mx-auto flex items-center gap-4 text-left"
+          className={`bg-white/5 border border-white/10 rounded-2xl ${
+            isCompact ? "p-3 mb-6" : "p-4 mb-8"
+          } max-w-md mx-auto flex items-center gap-4 text-left`}
         >
-          <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10 shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+          <div
+            className={`relative ${
+              isCompact ? "w-12 h-12 rounded-lg" : "w-16 h-16 rounded-xl"
+            } overflow-hidden bg-white/10 shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-500`}
+          >
             {/* Shimmer effect placeholder */}
             {!imageLoaded && !showFallback && (
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-shimmer bg-[length:200%_100%] content-['']" />
@@ -137,7 +162,9 @@ export default function UploadSuccess({
                 <img
                   src={meta.icon}
                   alt={meta.name}
-                  className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  }`}
                   onLoad={() => setImageLoaded(true)}
                   onError={() => {
                     setImageError(true);
@@ -147,7 +174,9 @@ export default function UploadSuccess({
               </div>
             ) : (
               <div
-                className={`w-full h-full flex items-center justify-center ${platform === "ios" ? "bg-slate-900" : "bg-emerald-600"}`}
+                className={`w-full h-full flex items-center justify-center ${
+                  platform === "ios" ? "bg-slate-900" : "bg-emerald-600"
+                }`}
               >
                 <img
                   src={
@@ -156,14 +185,20 @@ export default function UploadSuccess({
                       : "/images/logo/android-logo-svgrepo-com.svg"
                   }
                   alt={platform}
-                  className={`w-8 h-8 drop-shadow-md ${platform === "ios" ? "invert" : ""}`}
+                  className={`w-8 h-8 drop-shadow-md ${
+                    platform === "ios" ? "invert" : ""
+                  }`}
                 />
               </div>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-white truncate leading-tight mb-1">
+            <h3
+              className={`${
+                isCompact ? "text-base" : "text-lg"
+              } font-bold text-white truncate leading-tight mb-1`}
+            >
               {meta.name}
             </h3>
             <div className="flex flex-col gap-0.5">
@@ -184,7 +219,9 @@ export default function UploadSuccess({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-2xl p-4 mb-8 max-w-md mx-auto text-left relative overflow-hidden group"
+          className={`bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-2xl ${
+            isCompact ? "p-3 mb-6" : "p-4 mb-8"
+          } max-w-md mx-auto text-left relative overflow-hidden group`}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between relative z-10">
@@ -210,7 +247,11 @@ export default function UploadSuccess({
       )}
 
       {/* Copy Link Section */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-2 pl-4 flex items-center gap-3 mb-8 max-w-md mx-auto hover:bg-white/[0.07] transition-colors group">
+      <div
+        className={`bg-white/5 border border-white/10 rounded-2xl ${
+          isCompact ? "p-1.5 pl-3 mb-6" : "p-2 pl-4 mb-8"
+        } flex items-center gap-3 max-w-md mx-auto hover:bg-white/[0.07] transition-colors group`}
+      >
         <div className="flex-1 truncate text-left text-gray-300 font-mono text-sm">
           {url}
         </div>
@@ -220,7 +261,11 @@ export default function UploadSuccess({
             variant="ghost"
             onClick={handleCopy}
             className={`
-              ${copied ? "text-green-400 bg-green-400/10" : "text-gray-400 hover:text-white"}
+              ${
+                copied
+                  ? "text-green-400 bg-green-400/10"
+                  : "text-gray-400 hover:text-white"
+              }
               transition-colors
             `}
             title="Copy to clipboard"
@@ -244,23 +289,33 @@ export default function UploadSuccess({
       </div>
 
       {/* QR Code and Actions Grid */}
-      <div className="grid sm:grid-cols-2 gap-8 max-w-2xl mx-auto items-center">
-        {/* QR Code */}
+      <div
+        className={`grid ${
+          isCompact ? "grid-cols-1 gap-4" : "sm:grid-cols-2 gap-8"
+        } max-w-2xl mx-auto items-center`}
+      >
+        {/* QR Code - Only show in default mode or if explicitly requested, but maybe hide in compact if space is tight? 
+            Actually user screenshot shows QR Code "Download QR Code Scan to Install" at the bottom.
+            For compact mode, let's keep it but maybe smaller or stacked.
+            I'll stack it (grid-cols-1) for compact mode above.
+        */}
         {showQRCode && qrCodeData && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col items-center gap-3 bg-white p-4 rounded-2xl shadow-lg"
+            className={`flex flex-col items-center gap-3 bg-white ${
+              isCompact ? "p-3 order-last" : "p-4"
+            } rounded-2xl shadow-lg mx-auto w-full max-w-[200px]`}
           >
-            <div className="relative w-full aspect-square max-w-[180px]">
+            <div className="relative w-full aspect-square">
               <img
                 src={qrCodeData}
                 alt="Download QR Code"
                 className="w-full h-full object-contain rounded-lg"
               />
             </div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+            <span className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-widest flex items-center gap-2">
               <QrCodeIcon className="w-3 h-3" />
               Scan to Install
             </span>
@@ -269,15 +324,17 @@ export default function UploadSuccess({
 
         {/* Action Buttons */}
         <div
-          className={`flex flex-col gap-4 ${!showQRCode ? "col-span-2" : ""}`}
+          className={`flex flex-col gap-3 ${
+            !showQRCode ? "col-span-2" : ""
+          } w-full`}
         >
           <Button
             onClick={onUploadAnother}
             variant="outline"
-            className="w-full justify-center gap-2 py-6 text-base border-white/10 hover:bg-white/5 text-gray-300 hover:text-white group"
+            className="w-full justify-center gap-2 py-4 text-sm border-white/10 hover:bg-white/5 text-gray-300 hover:text-white group"
           >
-            <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-            Upload Another Build
+            <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+            Upload Another
           </Button>
 
           <Button
@@ -295,9 +352,9 @@ export default function UploadSuccess({
               }
             }}
             variant="secondary"
-            className="w-full justify-center gap-2 py-6 text-base bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-none shadow-lg shadow-blue-500/25"
+            className="w-full justify-center gap-2 py-4 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-none shadow-lg shadow-blue-500/25"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4" />
             Share Link
           </Button>
         </div>

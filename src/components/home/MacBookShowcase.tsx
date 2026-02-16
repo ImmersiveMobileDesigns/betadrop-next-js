@@ -637,12 +637,12 @@ export default function MacBookShowcase() {
           </div>
 
           {/* Trigger container that gets pinned */}
-          <div ref={triggerRef} className="relative min-h-screen">
+          <div ref={triggerRef} className="relative min-h-[100dvh]">
             {/* Content wrapper */}
-            <div className="h-screen flex flex-col items-center justify-center px-4 md:px-6 lg:px-8">
+            <div className="h-[100dvh] flex flex-col items-center justify-center px-4 md:px-6 lg:px-8">
               {/* Header */}
               <div className="absolute top-6 sm:top-8 lg:top-12 left-0 right-0 text-center z-10 px-4">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-2 sm:mb-3 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight">
                   See BetaDrop in Action
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-white/40 max-w-md lg:max-w-xl mx-auto">
@@ -654,7 +654,7 @@ export default function MacBookShowcase() {
               <div
                 className={cn(
                   "relative w-full max-w-7xl mx-auto flex items-center justify-center gap-6 md:gap-8 lg:gap-12 xl:gap-16",
-                  isSmallLaptop ? "flex-col mt-20" : "flex-row mt-16",
+                  isSmallLaptop ? "flex-col mt-16 md:mt-20" : "flex-row mt-16",
                 )}
               >
                 {/* MacBook Container */}
@@ -663,7 +663,7 @@ export default function MacBookShowcase() {
                   className={cn(
                     "relative will-change-transform",
                     isSmallLaptop
-                      ? "w-full max-w-xl"
+                      ? "w-full max-w-[min(36rem,70dvh)]"
                       : "w-full max-w-lg lg:max-w-2xl xl:max-w-3xl",
                   )}
                   style={{ perspective: "1200px" }}

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 /**
  * AnimateOnScroll Component - 4K Optimized
- * 
+ *
  * Performance optimizations for 4K (3840×2160) displays:
  * 1. GPU-only animations (transform, opacity) - no layout thrashing
  * 2. Reduced motion detection and respect
@@ -13,7 +13,7 @@
  * 7. will-change optimization (auto when not animating)
  */
 
-import { useEffect, useRef, useState, ReactNode } from 'react';
+import { useEffect, useRef, useState, ReactNode } from "react";
 import {
   ANIMATION_CONFIG,
   getAnimationPreset,
@@ -21,30 +21,39 @@ import {
   shouldDisableAnimations,
   is4KScreen,
   animationCounter,
-} from '@/lib/animationConfig';
+} from "@/lib/animationConfig";
 
 export interface AnimateOnScrollProps {
   children: ReactNode;
   className?: string;
-  
+
   // Animation type - all use GPU-accelerated transform + opacity only
-  animation?: 'fadeIn' | 'fadeUp' | 'fadeDown' | 'fadeLeft' | 'fadeRight' | 'scaleIn' | 'scaleUp' | 'none';
-  
+  animation?:
+    | "fadeIn"
+    | "fadeUp"
+    | "fadeDown"
+    | "fadeLeft"
+    | "fadeRight"
+    | "scaleIn"
+    | "scaleUp"
+    | "blurIn"
+    | "none";
+
   // Animation timing (auto-adjusted for 4K)
   duration?: number; // in milliseconds (default: 600)
   delay?: number; // in milliseconds (default: 0)
-  
+
   // IntersectionObserver options
   threshold?: number; // 0 to 1 (default: 0.1)
   rootMargin?: string; // e.g., "0px 0px -100px 0px"
-  
+
   // Animation behavior (default: once=true for performance)
   once?: boolean; // Animate only once (default: true)
-  
+
   // Stagger support (for children)
   stagger?: boolean;
   staggerDelay?: number; // in milliseconds (default: 100)
-  
+
   // Custom transform/opacity values
   initialOpacity?: number;
   initialY?: number;
@@ -54,12 +63,12 @@ export interface AnimateOnScrollProps {
 
 export function AnimateOnScroll({
   children,
-  className = '',
-  animation = 'fadeUp',
+  className = "",
+  animation = "fadeUp",
   duration = 600,
   delay = 0,
   threshold = 0.1,
-  rootMargin = '0px',
+  rootMargin = "0px",
   once = true, // Default to once for better performance
   stagger = false,
   staggerDelay = 100,
@@ -101,7 +110,7 @@ export function AnimateOnScroll({
             // animationCounter.start();
             setIsAnimating(true);
             setIsVisible(true);
-            
+
             if (once) {
               setHasAnimated(true);
             }
@@ -109,11 +118,13 @@ export function AnimateOnScroll({
             // 4K Performance: Clean up will-change after animation completes
             // const optimizedDuration = ANIMATION_CONFIG.duration.get4K(duration);
             const optimizedDuration = duration;
-            animationTimeoutRef.current = setTimeout(() => {
-              setIsAnimating(false);
-              // animationCounter.end();
-            }, optimizedDuration + delay + 50); // +50ms buffer
-            
+            animationTimeoutRef.current = setTimeout(
+              () => {
+                setIsAnimating(false);
+                // animationCounter.end();
+              },
+              optimizedDuration + delay + 50,
+            ); // +50ms buffer
           } else if (!once && hasAnimated && !entry.isIntersecting) {
             // Only for repeating animations (not recommended on 4K)
             setIsVisible(false);
@@ -123,7 +134,7 @@ export function AnimateOnScroll({
       {
         threshold,
         rootMargin,
-      }
+      },
     );
 
     observer.observe(element);
@@ -146,7 +157,11 @@ export function AnimateOnScroll({
    * Uses ANIMATION_CONFIG.distance.get4K() for 40% reduction on 4K screens
    */
   const getInitialTransform = () => {
-    if (initialY !== undefined || initialX !== undefined || initialScale !== undefined) {
+    if (
+      initialY !== undefined ||
+      initialX !== undefined ||
+      initialScale !== undefined
+    ) {
       const y = initialY ?? 0;
       const x = initialX ?? 0;
       const scale = initialScale ?? 1;
@@ -165,23 +180,37 @@ export function AnimateOnScroll({
 
     // Default fallback
     // return `translate3d(0, ${ANIMATION_CONFIG.distance.get4K(30)}px, 0)`;
-    return `translate3d(0, 30px, 0)`;
   };
 
-  // 4K Performance: Use optimized duration and transition
   // const optimizedDuration = ANIMATION_CONFIG.duration.get4K(duration);
   const optimizedDuration = duration;
-  const transitionString = createTransition(duration, delay, ANIMATION_CONFIG.easing.easeOut);
+  const easing =
+    animation === "blurIn"
+      ? ANIMATION_CONFIG.easing.circOut
+      : ANIMATION_CONFIG.easing.easeOut;
+  const transitionString = createTransition(duration, delay, easing);
 
   const baseStyle: React.CSSProperties = {
     opacity: isVisible ? 1 : initialOpacity,
-    transform: isVisible ? 'translate3d(0, 0, 0) scale(1)' : getInitialTransform(),
+    transform: isVisible
+      ? "translate3d(0, 0, 0) scale(1)"
+      : getInitialTransform(),
+    filter:
+      animation === "blurIn"
+        ? isVisible
+          ? "blur(0px)"
+          : "blur(10px)"
+        : undefined,
     transition: transitionString,
     // 4K Performance: Only set will-change when actively animating
-    willChange: isAnimating ? ANIMATION_CONFIG.gpu.willChangeActive : ANIMATION_CONFIG.gpu.willChange,
+    willChange: isAnimating
+      ? ANIMATION_CONFIG.gpu.willChangeActive
+      : ANIMATION_CONFIG.gpu.willChange,
     // Force GPU acceleration with translateZ(0)
-    ...(ANIMATION_CONFIG.gpu.transform3d && { 
-      WebkitTransform: isVisible ? 'translate3d(0, 0, 0) scale(1)' : getInitialTransform()
+    ...(ANIMATION_CONFIG.gpu.transform3d && {
+      WebkitTransform: isVisible
+        ? "translate3d(0, 0, 0) scale(1)"
+        : getInitialTransform(),
     }),
   };
 
@@ -189,7 +218,7 @@ export function AnimateOnScroll({
   if (stagger && isVisible) {
     // const optimizedStaggerDelay = ANIMATION_CONFIG.duration.get4K(staggerDelay);
     const optimizedStaggerDelay = staggerDelay;
-    
+
     return (
       <div ref={ref} className={className} style={baseStyle}>
         {Array.isArray(children)
@@ -203,7 +232,7 @@ export function AnimateOnScroll({
                     transform: getInitialTransform(),
                     animation: `staggerFadeIn ${optimizedDuration}ms ${ANIMATION_CONFIG.easing.easeOut} ${childDelay}ms forwards`,
                     // GPU acceleration for each child
-                    willChange: 'transform, opacity',
+                    willChange: "transform, opacity",
                   }}
                 >
                   {child}
@@ -231,7 +260,10 @@ export function AnimateOnScroll({
 }
 
 // Convenience wrapper components
-export function FadeIn({ children, ...props }: Omit<AnimateOnScrollProps, 'animation'>) {
+export function FadeIn({
+  children,
+  ...props
+}: Omit<AnimateOnScrollProps, "animation">) {
   return (
     <AnimateOnScroll animation="fadeIn" {...props}>
       {children}
@@ -239,7 +271,10 @@ export function FadeIn({ children, ...props }: Omit<AnimateOnScrollProps, 'anima
   );
 }
 
-export function FadeUp({ children, ...props }: Omit<AnimateOnScrollProps, 'animation'>) {
+export function FadeUp({
+  children,
+  ...props
+}: Omit<AnimateOnScrollProps, "animation">) {
   return (
     <AnimateOnScroll animation="fadeUp" {...props}>
       {children}
@@ -247,7 +282,10 @@ export function FadeUp({ children, ...props }: Omit<AnimateOnScrollProps, 'anima
   );
 }
 
-export function ScaleIn({ children, ...props }: Omit<AnimateOnScrollProps, 'animation'>) {
+export function ScaleIn({
+  children,
+  ...props
+}: Omit<AnimateOnScrollProps, "animation">) {
   return (
     <AnimateOnScroll animation="scaleIn" {...props}>
       {children}
@@ -255,9 +293,24 @@ export function ScaleIn({ children, ...props }: Omit<AnimateOnScrollProps, 'anim
   );
 }
 
-export function StaggerContainer({ children, staggerDelay = 100, ...props }: AnimateOnScrollProps) {
+export function StaggerContainer({
+  children,
+  staggerDelay = 100,
+  ...props
+}: AnimateOnScrollProps) {
   return (
     <AnimateOnScroll stagger={true} staggerDelay={staggerDelay} {...props}>
+      {children}
+    </AnimateOnScroll>
+  );
+}
+
+export function BlurIn({
+  children,
+  ...props
+}: Omit<AnimateOnScrollProps, "animation">) {
+  return (
+    <AnimateOnScroll animation="blurIn" {...props}>
       {children}
     </AnimateOnScroll>
   );

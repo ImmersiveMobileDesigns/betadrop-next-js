@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Logo from "@/components/ui/Logo";
-import { User } from "lucide-react";
+import { User, Layout } from "lucide-react";
 import { useUserSession } from "@/hooks/queries";
 
 interface SessionUser {
@@ -14,9 +14,19 @@ interface SessionUser {
   role: string;
 }
 
-export default function Header() {
-  /* 
-   * React Query handles data fetching and state (loading, error, data). 
+interface HeaderProps {
+  heroVariation?: "v1" | "v2";
+  setHeroVariation?: (variation: "v1" | "v2") => void;
+  mounted?: boolean;
+}
+
+export default function Header({
+  heroVariation,
+  setHeroVariation,
+  mounted = true,
+}: HeaderProps) {
+  /*
+   * React Query handles data fetching and state (loading, error, data).
    * The 'user' variable will automatically update.
    */
   const { data: user, isLoading } = useUserSession();
@@ -26,11 +36,14 @@ export default function Header() {
   // useEffect removed as logic is now handled by the hook
 
   // Handle navigation with hash scrolling
-  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNavigation = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
     // Check if this is a hash link to the home page
     if (href.startsWith("/#")) {
       const hash = href.substring(1); // Get the hash part (e.g., "#features")
-      
+
       if (pathname === "/") {
         // Already on home page, just scroll to the section
         e.preventDefault();
@@ -43,10 +56,10 @@ export default function Header() {
       } else {
         // On a different page, navigate to home with hash
         e.preventDefault();
-        
+
         // Navigate to home page with the hash
         router.push("/" + hash);
-        
+
         // Poll for the element to appear and scroll to it
         const scrollToElement = () => {
           const element = document.querySelector(hash);
@@ -60,7 +73,7 @@ export default function Header() {
           }
           return false;
         };
-        
+
         // Try immediately, then poll every 50ms for up to 2 seconds
         let attempts = 0;
         const maxAttempts = 40; // 40 * 50ms = 2 seconds
@@ -112,6 +125,29 @@ export default function Header() {
                     {link.name}
                   </Link>
                 ))}
+
+                {setHeroVariation && (
+                  <button
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      setTimeout(() => {
+                        setHeroVariation(heroVariation === "v1" ? "v2" : "v1");
+                      }, 400);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 flex items-center gap-2 min-w-[110px] justify-center"
+                  >
+                    <Layout className="w-4 h-4" />
+                    <span>
+                      {!mounted ? (
+                        <span className="opacity-0">Modern</span>
+                      ) : heroVariation === "v1" ? (
+                        "Modern"
+                      ) : (
+                        "Classic"
+                      )}
+                    </span>
+                  </button>
+                )}
               </div>
 
               {/* Right side - CTA Buttons */}

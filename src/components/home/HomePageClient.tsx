@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import {
   Upload,
@@ -15,7 +16,10 @@ import {
   Download,
   Users,
 } from "lucide-react";
-import { AnimateOnScroll } from "@/components/animations/AnimateOnScroll";
+import {
+  AnimateOnScroll,
+  BlurIn,
+} from "@/components/animations/AnimateOnScroll";
 import { CountUp } from "@/components/animations/CountUp";
 
 import Logo from "@/components/ui/Logo";
@@ -27,10 +31,100 @@ import ScrollToTop from "@/components/ui/ScrollToTop";
 import { usePlatformStats } from "@/hooks/queries";
 import { Accordion } from "@/components/ui/Accordion";
 import HeroSectionVariation2 from "./HeroSectionVariation2";
+import DeveloperFeatures from "./DeveloperFeatures";
 
 export default function HomePageClient() {
   const { data: stats } = usePlatformStats();
   const [isMobile, setIsMobile] = useState(false);
+  /*
+   * Initialize state from localStorage if available, otherwise default to "v1".
+   * This ensures the user's layout preference persists across sessions.
+   */
+  const [heroVariation, setHeroVariation] = useState<"v1" | "v2">("v1");
+  const [droppedFile, setDroppedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const dragCounter = useRef(0);
+
+  useEffect(() => {
+    // Only access localStorage on client mount
+    const saved = localStorage.getItem("hero_preference");
+    if (saved === "v1" || saved === "v2") {
+      setHeroVariation(saved);
+    }
+    setMounted(true);
+  }, []);
+
+  // Global Drag and Drop Listener
+  useEffect(() => {
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current += 1;
+
+      if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+        setIsDragging(true);
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current -= 1;
+
+      if (dragCounter.current === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      setIsDragging(false);
+      dragCounter.current = 0;
+
+      if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        const ext = file.name.split(".").pop()?.toLowerCase();
+
+        if (ext === "ipa" || ext === "apk") {
+          setDroppedFile(file);
+
+          // Smooth scroll to upload section
+          const uploadSection = document.getElementById("upload-section");
+          if (uploadSection) {
+            uploadSection.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }
+      }
+    };
+
+    window.addEventListener("dragenter", handleDragEnter);
+    window.addEventListener("dragleave", handleDragLeave);
+    window.addEventListener("dragover", handleDragOver);
+    window.addEventListener("drop", handleDrop);
+
+    return () => {
+      window.removeEventListener("dragenter", handleDragEnter);
+      window.removeEventListener("dragleave", handleDragLeave);
+      window.removeEventListener("dragover", handleDragOver);
+      window.removeEventListener("drop", handleDrop);
+    };
+  }, []);
+
+  const handleVariationChange = (variation: "v1" | "v2") => {
+    setHeroVariation(variation);
+    localStorage.setItem("hero_preference", variation);
+  };
 
   // Detect mobile/tablet on client side
   useEffect(() => {
@@ -52,13 +146,104 @@ export default function HomePageClient() {
 
   const currentStats = stats || defaultStats;
 
+  // Handle hash navigation with robust polling to account for GSAP layout shifts
+  useEffect(() => {
+    const handleHashScroll = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const element = document.querySelector(hash);
+        if (element) {
+          // Attempt to scroll to the element multiple times
+          // This ensures we catch the element after GSAP pins/spacers are added
+          const scrollToTarget = () => {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+          };
+
+          // Immediate attempt
+          scrollToTarget();
+
+          // Retry schedule to handle layout hydration and GSAP initialization
+          // The pin expansion usually happens within the first 500ms-1s
+          const timeOuts = [100, 300, 600, 1000, 1500];
+
+          timeOuts.forEach((delay) => {
+            setTimeout(scrollToTarget, delay);
+          });
+        }
+      }
+    };
+
+    // Run on mount
+    handleHashScroll();
+
+    // Listen for hash changes
+    window.addEventListener("hashchange", handleHashScroll);
+    return () => window.removeEventListener("hashchange", handleHashScroll);
+  }, []);
+
   return (
     <>
-      <Header />
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-8 pointer-events-none"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0B1121] border-2 border-dashed border-blue-500 rounded-3xl p-12 max-w-2xl w-full flex flex-col items-center justify-center text-center shadow-[0_0_50px_rgba(59,130,246,0.2)]"
+            >
+              <div className="w-32 h-32 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 animate-pulse text-blue-400">
+                <Upload className="w-16 h-16" />
+              </div>
+              <h2 className="text-4xl font-bold text-white mb-4">
+                Drop to Upload
+              </h2>
+              <p className="text-xl text-white/60 mb-8 max-w-md">
+                Release your{" "}
+                <span className="text-blue-400 font-medium">.ipa</span> or{" "}
+                <span className="text-purple-400 font-medium">.apk</span> file
+                here to start sharing
+              </p>
 
-      {/* Hero Section */}
-      <HeroSectionVariation1 />
+              <div className="flex gap-4">
+                <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2 text-sm text-white/60">
+                  <Smartphone className="w-4 h-4 text-blue-400" /> iOS IPA
+                </div>
+                <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2 text-sm text-white/60">
+                  <Smartphone className="w-4 h-4 text-purple-400" /> Android APK
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      <Header
+        heroVariation={heroVariation}
+        setHeroVariation={handleVariationChange}
+        mounted={mounted}
+      />
+
+      <AnimatePresence mode="wait">
+        {heroVariation === "v1" ? (
+          <BlurIn key="v1" duration={400} className="w-full">
+            <HeroSectionVariation1 droppedFile={droppedFile} />
+          </BlurIn>
+        ) : (
+          <BlurIn key="v2" duration={400} className="w-full">
+            <HeroSectionVariation2 droppedFile={droppedFile} />
+          </BlurIn>
+        )}
+      </AnimatePresence>
+
+      <div className="mt-20">
+        <DeveloperFeatures />
+      </div>
       {/* Stats Section */}
       <AnimateOnScroll
         animation="fadeIn"
@@ -119,7 +304,7 @@ export default function HomePageClient() {
             threshold={0.2}
             className="text-center mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-6">
               How It Works
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-white/60 max-w-2xl mx-auto">
@@ -197,7 +382,7 @@ export default function HomePageClient() {
             threshold={0.2}
             className="text-center mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-6">
               Why Choose BetaDrop?
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-white/60 max-w-2xl mx-auto">
@@ -345,7 +530,7 @@ export default function HomePageClient() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-indigo-500/20 to-purple-500/20 border border-white/10 p-12 md:p-20">
             <div className="relative z-10">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-6">
                 Ready to Distribute?
               </h2>
               <p className="text-sm sm:text-base md:text-lg text-white/60 mb-10 max-w-xl mx-auto">
