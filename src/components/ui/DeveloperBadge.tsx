@@ -9,34 +9,11 @@ import Link from "next/link";
 
 export default function DeveloperBadge() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const handleInteraction = (state: boolean) => {
-    if (!isMobile) {
-      setIsOpen(state);
-    }
-  };
-
-  const handleMobileClick = () => {
-    if (isMobile) {
-      setIsOpen(!isOpen);
-    }
-  };
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
-      className={`fixed bottom-2 left-2 sm:bottom-6 sm:left-6 z-50 flex flex-col items-start gap-3 ${styles.fadeInUp}`}
-      onMouseEnter={() => handleInteraction(true)}
-      onMouseLeave={() => handleInteraction(false)}
+      className={`fixed bottom-1.5 left-1.5 sm:bottom-4 sm:left-4 z-50 flex flex-col items-start gap-2 ${styles.fadeInUp}`}
     >
       <AnimatePresence>
         {isOpen && (
@@ -52,46 +29,68 @@ export default function DeveloperBadge() {
         )}
       </AnimatePresence>
 
-      <Link
-        href="https://imobiledesigns.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
+      <motion.div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        animate={{
+          y: [0, -4, 0],
+        }}
+        transition={{
+          duration: 3,
+          ease: "easeInOut",
+          repeat: Infinity,
+        }}
+        className={`
+          relative group
+          flex items-center
+          bg-slate-900/90 backdrop-blur-xl
+          border border-slate-700/50
+          rounded-full px-2 py-1.5 sm:px-3 sm:py-2
+          shadow-[0_0_20px_rgba(14,165,233,0.3)]
+          hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]
+          hover:bg-slate-900
+          transition-all duration-300
+        `}
       >
-        <motion.button
-          onClick={(e) => {
-            if (isMobile) {
-              e.preventDefault();
-              handleMobileClick();
-            }
-          }}
-          animate={{
-            y: [0, -4, 0],
-          }}
-          transition={{
-            duration: 3,
-            ease: "easeInOut",
-            repeat: Infinity,
-          }}
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          className={`
-            relative group
-            flex items-center gap-2 sm:gap-3
-            bg-slate-900/90 backdrop-blur-xl
-            border border-slate-700/50
-            rounded-full px-3 py-2 sm:px-4 sm:py-2.5
-            shadow-[0_0_20px_rgba(14,165,233,0.3)]
-            hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]
-            hover:bg-slate-900
-            transition-all duration-300
-          `}
-        >
-          {/* Glow Effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-500/20 to-accent-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
+        {/* Glow Effect */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-500/20 to-accent-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
 
+        {/* Tic Tac Toe Toggle Button Container */}
+        <motion.div
+          animate={{
+            width: isHovered || isOpen ? "auto" : 0,
+            opacity: isHovered || isOpen ? 1 : 0,
+            marginRight: isHovered || isOpen ? 8 : 0,
+          }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="flex items-center overflow-hidden h-full"
+        >
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className={`
+                relative z-20 p-1 rounded-full 
+                transition-all duration-300
+                ${isOpen ? "text-primary-400 bg-primary-500/10" : "text-slate-400 hover:text-primary-400 hover:bg-slate-800"}
+              `}
+              title={isOpen ? "Close Game" : "Play Tic-Tac-Toe"}
+            >
+              <Gamepad2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+
+            {/* Vertical Divider */}
+            <div className="w-[1px] h-3 bg-slate-700/50" />
+          </div>
+        </motion.div>
+
+        <Link
+          href="https://imobiledesigns.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 sm:gap-2 relative z-10"
+        >
           {/* Logo */}
-          <div className="w-6 h-6 sm:w-7 sm:h-7 relative flex-shrink-0 drop-shadow-sm">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 relative flex-shrink-0 drop-shadow-sm">
             <Image
               src="/images/logo/imd-small-logo.png"
               alt="iMobile Designs"
@@ -102,15 +101,15 @@ export default function DeveloperBadge() {
           </div>
 
           {/* Text */}
-          <div className="flex flex-col text-left relative z-10">
-            <span className="text-[10px] sm:text-xs font-semibold text-slate-200 whitespace-nowrap leading-tight">
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] sm:text-[10px] font-semibold text-slate-200 whitespace-nowrap leading-tight">
               Developed by{" "}
               <span className="bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent font-bold">
                 iMobile Designs
               </span>
             </span>
 
-            <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-medium text-slate-400 whitespace-nowrap mt-0.5">
+            <div className="flex items-center gap-1 text-[8px] sm:text-[9px] font-medium text-slate-400 whitespace-nowrap mt-0.5">
               <span>Made with</span>
               <motion.div
                 animate={{
@@ -122,13 +121,13 @@ export default function DeveloperBadge() {
                   ease: "easeInOut",
                 }}
               >
-                <Heart className="w-2.5 h-2.5 text-rose-500 fill-rose-500" />
+                <Heart className="w-2 h-2 text-rose-500 fill-rose-500" />
               </motion.div>
               <span>in India</span>
             </div>
           </div>
-        </motion.button>
-      </Link>
+        </Link>
+      </motion.div>
     </div>
   );
 }
@@ -244,7 +243,7 @@ function TicTacToeGame({ onClose }: { onClose: () => void }) {
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-rose-500 transition-colors sm:hidden"
+              className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-rose-500 transition-colors"
               title="Close"
             >
               <X className="w-3.5 h-3.5" />

@@ -451,7 +451,7 @@ export default function SettingsPage() {
                     type="text"
                     value={claimToken}
                     onChange={(e) => setClaimToken(e.target.value)}
-                    placeholder="Paste your guest upload token..."
+                    placeholder="Enter token or paste share link to find your upload..."
                     className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-primary-500/50 focus:bg-white/10 transition-all"
                   />
                 </div>

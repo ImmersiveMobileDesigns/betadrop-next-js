@@ -30,17 +30,19 @@ import MacBookShowcaseMobile from "@/components/home/MacBookShowcaseMobile";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { usePlatformStats } from "@/hooks/queries";
 import { Accordion } from "@/components/ui/Accordion";
+import { useToast } from "@/components/ui/Toast";
 import HeroSectionVariation2 from "./HeroSectionVariation2";
 import DeveloperFeatures from "./DeveloperFeatures";
 
 export default function HomePageClient() {
   const { data: stats } = usePlatformStats();
+  const { error, success } = useToast();
   const [isMobile, setIsMobile] = useState(false);
   /*
    * Initialize state from localStorage if available, otherwise default to "v1".
    * This ensures the user's layout preference persists across sessions.
    */
-  const [heroVariation, setHeroVariation] = useState<"v1" | "v2">("v1");
+  const [heroVariation, setHeroVariation] = useState<"v1" | "v2">("v2");
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -94,30 +96,33 @@ export default function HomePageClient() {
         const ext = file.name.split(".").pop()?.toLowerCase();
 
         if (ext === "ipa" || ext === "apk") {
+          success("File added successfully!");
           setDroppedFile(file);
 
-          // Smooth scroll to upload section
-          const uploadSection = document.getElementById("upload-section");
-          if (uploadSection) {
-            uploadSection.scrollIntoView({
+          // Smooth scroll to upload card
+          const uploadCard = document.getElementById("guest-upload-card");
+          if (uploadCard) {
+            uploadCard.scrollIntoView({
               behavior: "smooth",
               block: "center",
             });
           }
+        } else {
+          error("Please upload an IPA or APK file only.");
         }
       }
     };
 
-    window.addEventListener("dragenter", handleDragEnter);
-    window.addEventListener("dragleave", handleDragLeave);
-    window.addEventListener("dragover", handleDragOver);
-    window.addEventListener("drop", handleDrop);
+    window.addEventListener("dragenter", handleDragEnter, true);
+    window.addEventListener("dragleave", handleDragLeave, true);
+    window.addEventListener("dragover", handleDragOver, true);
+    window.addEventListener("drop", handleDrop, true);
 
     return () => {
-      window.removeEventListener("dragenter", handleDragEnter);
-      window.removeEventListener("dragleave", handleDragLeave);
-      window.removeEventListener("dragover", handleDragOver);
-      window.removeEventListener("drop", handleDrop);
+      window.removeEventListener("dragenter", handleDragEnter, true);
+      window.removeEventListener("dragleave", handleDragLeave, true);
+      window.removeEventListener("dragover", handleDragOver, true);
+      window.removeEventListener("drop", handleDrop, true);
     };
   }, []);
 
@@ -241,9 +246,9 @@ export default function HomePageClient() {
         )}
       </AnimatePresence>
 
-      <div className="mt-20">
-        <DeveloperFeatures />
-      </div>
+      <DeveloperFeatures />
+      {/* <div className="mt-20">
+      </div> */}
       {/* Stats Section */}
       <AnimateOnScroll
         animation="fadeIn"
@@ -570,6 +575,12 @@ export default function HomePageClient() {
                   className="hover:text-white transition-colors"
                 >
                   Blog
+                </Link>
+                <Link
+                  href="/contact"
+                  className="hover:text-white transition-colors"
+                >
+                  Contact
                 </Link>
                 <Link
                   href="/terms"

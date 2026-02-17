@@ -107,7 +107,10 @@ export default function FileUploadZone({
           <div>
             {file ? (
               <>
-                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+                <h3
+                  className="px-2 text-xl font-bold text-white mb-2 tracking-tight truncate max-w-[280px] sm:max-w-md"
+                  title={file.name}
+                >
                   {file.name}
                 </h3>
                 {showMetadata && (

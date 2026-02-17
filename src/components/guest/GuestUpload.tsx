@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { Button } from "../ui/Button";
@@ -38,6 +38,7 @@ export default function GuestUpload({
     meta?: any;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState<Config>({
     guestLinkExpiryHours: 72,
     guestLinkExpiryDays: 3,
@@ -67,6 +68,8 @@ export default function GuestUpload({
       return;
     }
 
+    // Clear previous upload result so the upload form shows with the new file
+    setUploadResult(null);
     setFile(selectedFile);
   };
   // ... rest of the file
@@ -114,6 +117,14 @@ export default function GuestUpload({
               meta: data.meta,
             });
             setIsUploading(false);
+
+            // Scroll the upload card into view so user can see the success section
+            setTimeout(() => {
+              cardRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }, 100);
           },
           onError: (err) => {
             setError(err instanceof Error ? err.message : "Upload failed");
@@ -160,9 +171,15 @@ export default function GuestUpload({
   };
 
   return (
-    <div className="relative group w-full max-w-2xl mx-auto rounded-3xl p-[1px] overflow-hidden">
-      {/* Infinity Animated Border */}
-      <div className="absolute inset-[-100%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_50%,#3b82f6_50%,#a855f7_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+    <div
+      ref={cardRef}
+      id="guest-upload-card"
+      className="relative group w-full max-w-2xl mx-auto rounded-3xl p-[1px]"
+    >
+      {/* Infinity Animated Border - wrapped in its own overflow container */}
+      <div className="absolute inset-0 rounded-3xl overflow-hidden">
+        <div className="absolute inset-[-100%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_50%,#3b82f6_50%,#a855f7_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+      </div>
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl opacity-50 blur-xl group-hover:opacity-75 transition-opacity duration-500" />
 
       {/* Main Card Content */}

@@ -72,6 +72,7 @@ export interface Build {
   // Derived columns (not in DB table)
   default_short_id?: string;
   icon_url?: string | null;
+  dominant_color?: string | null;
 }
 
 export interface BuildAnalytics {

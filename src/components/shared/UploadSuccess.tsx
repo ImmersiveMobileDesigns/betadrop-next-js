@@ -26,7 +26,9 @@ interface UploadSuccessProps {
     name: string;
     version: string;
     package: string;
+
     icon: string;
+    dominantColor?: string;
   };
 }
 
@@ -53,14 +55,15 @@ export default function UploadSuccess({
         width: 400,
         margin: 1,
         color: {
-          dark: "#000000",
+          dark: meta?.dominantColor || "#000000",
           light: "#ffffff",
         },
+        errorCorrectionLevel: "H",
       })
         .then((dataUrl) => setQrCodeData(dataUrl))
         .catch((err) => console.error("QR Code generation failed", err));
     }
-  }, [url, showQRCode]);
+  }, [url, showQRCode, meta?.dominantColor]);
 
   const handleCopy = async () => {
     try {
@@ -214,7 +217,7 @@ export default function UploadSuccess({
       )}
 
       {/* Claim Upload Banner - ONLY for guests */}
-      {showClaimBanner && (
+      {/* {showClaimBanner && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -244,7 +247,7 @@ export default function UploadSuccess({
             </Button>
           </div>
         </motion.div>
-      )}
+      )} */}
 
       {/* Copy Link Section */}
       <div
@@ -314,6 +317,15 @@ export default function UploadSuccess({
                 alt="Download QR Code"
                 className="w-full h-full object-contain rounded-lg"
               />
+              {meta?.icon && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[22%] h-[22%] p-[2px] bg-white rounded-md shadow-sm overflow-hidden flex items-center justify-center">
+                  <img
+                    src={meta.icon}
+                    alt="App Icon"
+                    className="w-full h-full object-cover rounded-sm"
+                  />
+                </div>
+              )}
             </div>
             <span className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-widest flex items-center gap-2">
               <QrCodeIcon className="w-3 h-3" />

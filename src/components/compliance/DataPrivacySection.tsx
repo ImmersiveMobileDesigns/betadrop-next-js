@@ -70,7 +70,7 @@ export function DataPrivacySection({ user }: DataPrivacySectionProps) {
           <div>
             <h3 className="text-white font-medium">Export Your Data</h3>
             <p className="text-sm text-white/50">
-              Download all your personal data (GDPR Article 15)
+              Download all your personal data
             </p>
           </div>
         </div>
@@ -81,7 +81,7 @@ export function DataPrivacySection({ user }: DataPrivacySectionProps) {
         <Button
           onClick={handleExport}
           isLoading={exportData.isPending}
-          className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/20"
+          variant="primary"
         >
           {exportSuccess ? (
             <>
@@ -111,7 +111,7 @@ export function DataPrivacySection({ user }: DataPrivacySectionProps) {
           <div>
             <h3 className="text-white font-medium">Delete Account</h3>
             <p className="text-sm text-white/50">
-              Permanently erase your account and data (GDPR Article 17)
+              Permanently erase your account and data
             </p>
           </div>
         </div>
@@ -119,10 +119,7 @@ export function DataPrivacySection({ user }: DataPrivacySectionProps) {
           This action is irreversible. All your builds, files, passkeys, and
           personal data will be permanently deleted.
         </p>
-        <Button
-          onClick={() => setShowDeleteModal(true)}
-          className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/20"
-        >
+        <Button onClick={() => setShowDeleteModal(true)} variant="danger">
           <Trash2 className="w-4 h-4 mr-2" />
           Delete My Account
         </Button>

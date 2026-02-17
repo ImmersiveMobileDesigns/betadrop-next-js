@@ -113,7 +113,7 @@ export default function HeroSectionVariation2({
           duration={700}
           delay={400}
           threshold={0.1}
-          className="mb-20"
+          className="mb-0"
         >
           <FeatureMap>
             <GuestUpload droppedFile={droppedFile} />

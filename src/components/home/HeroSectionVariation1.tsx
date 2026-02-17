@@ -37,11 +37,11 @@ export default function HeroSectionVariation1({
   return (
     <>
       <section
-        className="relative min-h-[calc(100dvh-5rem)] flex items-center mt-32 pb-10 px-4 z-10 overflow-visible"
+        className="relative  flex items-center mt-24 lg:mt-12 pb-10 px-4 z-10 overflow-visible"
         style={{ contain: "layout" }}
       >
         <div className="max-w-6xl w-full mx-auto relative px-4 !text-left">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid min-h-[calc(100dvh-5rem)] lg:grid-cols-2 gap-12 items-center">
             {/* Left Column: Text Content */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
               {/* Top Pill */}

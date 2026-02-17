@@ -79,6 +79,7 @@ interface InstallDataGuest {
   iconUrl: string;
   downloadUrl: string;
   manifestUrl: string;
+  dominantColor?: string;
 }
 
 type InstallData = InstallDataBuild | InstallDataGuest;
@@ -95,6 +96,7 @@ interface GuestAppData {
   buildNumber?: string;
   minOsVersion?: string;
   iconUrl?: string;
+  dominantColor?: string;
   permissions?: string[];
   provisionedDevices?: string[];
   deviceFamilies?: string[];
