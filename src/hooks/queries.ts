@@ -11,7 +11,9 @@ import {
   Build,
   ShareLink,
   BuildFeedback,
+  BuildAnalytics,
   BuildAnalyticsSummary,
+  FullBuildAnalytics,
 } from "@/types";
 
 // Constants
@@ -285,10 +287,16 @@ export const useBuildAnalytics = (buildId: string) => {
     queryFn: async () => {
       const response = await fetchFromLaravel<{
         success: boolean;
-        data: { summary: BuildAnalyticsSummary };
+        data: {
+          summary: BuildAnalyticsSummary;
+          recent_installs: BuildAnalytics[];
+        };
       }>(`/api/builds/${buildId}/analytics`);
       if (response.success && response.data?.summary) {
-        return response.data.summary;
+        return {
+          summary: response.data.summary,
+          recent_installs: response.data.recent_installs || [],
+        } as FullBuildAnalytics;
       }
       throw new Error("Failed to load analytics");
     },

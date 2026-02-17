@@ -18,6 +18,12 @@ export default function QRCode({ url, size = 180, color, icon }: QRCodeProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [iconError, setIconError] = useState(false);
+
+  // Reset icon error when icon prop changes
+  useEffect(() => {
+    setIconError(false);
+  }, [icon]);
 
   useEffect(() => {
     if (!url) {
@@ -81,12 +87,13 @@ export default function QRCode({ url, size = 180, color, icon }: QRCodeProps) {
         className="block rounded-lg"
         unoptimized
       />
-      {icon && (
+      {icon && !iconError && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[22%] h-[22%] p-[2px] bg-white rounded-md shadow-sm overflow-hidden flex items-center justify-center">
           <img
             src={icon}
             alt="App Icon"
             className="w-full h-full object-cover rounded-sm"
+            onError={() => setIconError(true)}
           />
         </div>
       )}

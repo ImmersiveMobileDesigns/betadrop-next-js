@@ -317,12 +317,13 @@ export default function UploadSuccess({
                 alt="Download QR Code"
                 className="w-full h-full object-contain rounded-lg"
               />
-              {meta?.icon && (
+              {meta?.icon && !imageError && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[22%] h-[22%] p-[2px] bg-white rounded-md shadow-sm overflow-hidden flex items-center justify-center">
                   <img
                     src={meta.icon}
                     alt="App Icon"
                     className="w-full h-full object-cover rounded-sm"
+                    onError={() => setImageError(true)}
                   />
                 </div>
               )}

@@ -293,6 +293,12 @@ export interface BuildWithAnalytics extends Build {
   versions?: BuildVersion[];
 }
 
+// Full analytics response from API (summary + recent installs)
+export interface FullBuildAnalytics {
+  summary: BuildAnalyticsSummary;
+  recent_installs: BuildAnalytics[];
+}
+
 // Analytics summary
 export interface BuildAnalyticsSummary {
   total_downloads: number;
