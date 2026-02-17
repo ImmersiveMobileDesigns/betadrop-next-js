@@ -1,47 +1,60 @@
-'use client';
+"use client";
 
-import { useState, Suspense } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { Mail, ArrowRight, Sparkles, Shield, Zap, Fingerprint } from 'lucide-react';
-import Logo from '@/components/ui/Logo';
+import { useState, Suspense } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  Mail,
+  ArrowRight,
+  Sparkles,
+  Shield,
+  Zap,
+  Fingerprint,
+} from "lucide-react";
+import Logo from "@/components/ui/Logo";
+import { useToast } from "@/components/ui/Toast";
 
-import { fetchFromLaravel } from '@/lib/api-client';
+import { fetchFromLaravel } from "@/lib/api-client";
 
 function LoginForm() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const searchParams = useSearchParams();
+  const { error: toastError } = useToast();
 
-  const errorParam = searchParams.get('error');
+  const errorParam = searchParams.get("error");
   const errorMessages: Record<string, string> = {
-    missing_token: 'Login link is missing. Please request a new one.',
-    invalid_token: 'Login link has expired or is invalid. Please request a new one.',
-    google_auth_failed: 'Google Sign-In failed. Please try again.',
-    missing_params: 'Google Sign-In was cancelled or failed. Please try again.',
-    invalid_state: 'For your security, please sign in again.',
-    unverified_email: 'Please verify your Google email address first.',
+    missing_token: "Login link is missing. Please request a new one.",
+    invalid_token:
+      "Login link has expired or is invalid. Please request a new one.",
+    google_auth_failed: "Google Sign-In failed. Please try again.",
+    missing_params: "Google Sign-In was cancelled or failed. Please try again.",
+    invalid_state: "For your security, please sign in again.",
+    unverified_email: "Please verify your Google email address first.",
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
     setIsSent(true);
 
     try {
-      await fetchFromLaravel('/api/auth/login', {
-        method: 'POST',
+      await fetchFromLaravel("/api/auth/login", {
+        method: "POST",
         // fetchFromLaravel adds Content-Type
         body: JSON.stringify({ email }),
       });
     } catch (err) {
       console.error(err);
       setIsSent(false);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const message =
+        err instanceof Error ? err.message : "Please try again later";
+      setError(message);
+      toastError(message);
     } finally {
       setIsLoading(false);
     }
@@ -49,51 +62,62 @@ function LoginForm() {
 
   const handlePasskeyLogin = async () => {
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       // Check if WebAuthn is supported
       if (!window.PublicKeyCredential) {
-        setError('Your current browser doesn\'t support Passkeys. Please use Chrome, Edge, or Safari.');
+        setError(
+          "Your current browser doesn't support Passkeys. Please use Chrome, Edge, or Safari.",
+        );
         return;
       }
 
       // Get authentication options from server
-      const optionsRes = await fetchFromLaravel<{success: boolean, data: any, error?: string}>('/api/auth/passkey/login');
+      const optionsRes = await fetchFromLaravel<{
+        success: boolean;
+        data: any;
+        error?: string;
+      }>("/api/auth/passkey/login");
 
       // The backend should return options in `data`. Check success.
       if (!optionsRes.success) {
-         setError(optionsRes.error || 'Failed to start passkey login');
-         return;
+        setError(optionsRes.error || "Failed to start passkey login");
+        return;
       }
 
       const { options, challenge } = optionsRes.data;
 
       // Start WebAuthn authentication
-      const { startAuthentication } = await import('@simplewebauthn/browser');
+      const { startAuthentication } = await import("@simplewebauthn/browser");
       const authResponse = await startAuthentication({ optionsJSON: options });
 
       // Verify with server
-      const verifyRes = await fetchFromLaravel<{success: boolean, error?: string}>('/api/auth/passkey/login', {
-        method: 'POST',
+      const verifyRes = await fetchFromLaravel<{
+        success: boolean;
+        error?: string;
+      }>("/api/auth/passkey/login", {
+        method: "POST",
         body: JSON.stringify({ response: authResponse, challenge }),
       });
 
       if (!verifyRes.success) {
-        setError(verifyRes.error || 'Passkey authentication failed');
+        setError(verifyRes.error || "Passkey authentication failed");
         return;
       }
 
       // Success - redirect to dashboard
-      window.location.href = '/dashboard';
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
-      console.error('Passkey login error:', err);
-      if (err instanceof Error && err.name === 'NotAllowedError') {
-        setError('Passkey sign-in was cancelled.');
-      } else if (err instanceof Error && err.name === 'SecurityError') {
-        setError('Security error. Make sure you\'re using HTTPS.');
+      console.error("Passkey login error:", err);
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setError("Passkey sign-in was cancelled.");
+      } else if (err instanceof Error && err.name === "SecurityError") {
+        setError("Security error. Make sure you're using HTTPS.");
       } else {
-        setError('Failed to authenticate with Passkey. Please try email login.');
+        setError(
+          "Failed to authenticate with Passkey. Please try email login.",
+        );
       }
     } finally {
       setIsLoading(false);
@@ -107,7 +131,10 @@ function LoginForm() {
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 bg-grid opacity-[0.05]" />
           <div className="bg-blob bg-blob-1 animate-float opacity-20" />
-          <div className="bg-blob bg-blob-2 animate-float opacity-20" style={{ animationDelay: '2s' }} />
+          <div
+            className="bg-blob bg-blob-2 animate-float opacity-20"
+            style={{ animationDelay: "2s" }}
+          />
         </div>
 
         <div className="relative z-10 w-full max-w-md">
@@ -156,7 +183,10 @@ function LoginForm() {
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-[0.05]" />
         <div className="bg-blob bg-blob-1 animate-float opacity-20" />
-        <div className="bg-blob bg-blob-2 animate-float opacity-20" style={{ animationDelay: '2s' }} />
+        <div
+          className="bg-blob bg-blob-2 animate-float opacity-20"
+          style={{ animationDelay: "2s" }}
+        />
       </div>
 
       {/* Left Side - Branding (Hidden on mobile) */}
@@ -172,21 +202,36 @@ function LoginForm() {
           </h1>
 
           <p className="text-xl text-white/60 mb-12 leading-relaxed">
-            The simplest way to distribute iOS and Android beta apps to your testers. No waiting, no complexity.
+            The simplest way to distribute iOS and Android beta apps to your
+            testers. No waiting, no complexity.
           </p>
 
           {/* Feature Pills */}
           <div className="space-y-4">
             {[
-              { icon: Zap, text: 'Instant OTA Installation', color: 'from-yellow-400 to-orange-500' },
-              { icon: Shield, text: 'Secure Access Links', color: 'from-blue-400 to-cyan-500' },
-              { icon: Sparkles, text: 'Start for Free', color: 'from-purple-400 to-pink-500' },
+              {
+                icon: Zap,
+                text: "Instant OTA Installation",
+                color: "from-yellow-400 to-orange-500",
+              },
+              {
+                icon: Shield,
+                text: "Secure Access Links",
+                color: "from-blue-400 to-cyan-500",
+              },
+              {
+                icon: Sparkles,
+                text: "Start for Free",
+                color: "from-purple-400 to-pink-500",
+              },
             ].map((feature, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="flex items-center gap-4 glass rounded-2xl px-5 py-4 border border-white/10 hover:border-white/20 transition-colors group"
               >
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                <div
+                  className={`w-10 h-10 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                >
                   <feature.icon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white font-medium">{feature.text}</span>
@@ -210,9 +255,7 @@ function LoginForm() {
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                 Welcome Back
               </h2>
-              <p className="text-white/50">
-                Sign in to access your dashboard
-              </p>
+              <p className="text-white/50">Sign in to access your dashboard</p>
             </div>
 
             {/* Error from URL params */}
@@ -221,7 +264,9 @@ function LoginForm() {
                 <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-red-400 text-xs">!</span>
                 </div>
-                <p className="text-red-400 text-sm">{errorMessages[errorParam]}</p>
+                <p className="text-red-400 text-sm">
+                  {errorMessages[errorParam]}
+                </p>
               </div>
             )}
 
@@ -237,12 +282,19 @@ function LoginForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-3">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-white/70 mb-3"
+                >
                   Email Address
                 </label>
-                <div className={`relative transition-all duration-300 ${isFocused ? 'scale-[1.02]' : ''}`}>
+                <div
+                  className={`relative transition-all duration-300 ${isFocused ? "scale-[1.02]" : ""}`}
+                >
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className={`w-5 h-5 transition-colors ${isFocused ? 'text-primary-400' : 'text-white/30'}`} />
+                    <Mail
+                      className={`w-5 h-5 transition-colors ${isFocused ? "text-primary-400" : "text-white/30"}`}
+                    />
                   </div>
                   <input
                     id="email"
@@ -266,9 +318,24 @@ function LoginForm() {
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     <span>Sending Magic Link...</span>
                   </>
@@ -287,13 +354,17 @@ function LoginForm() {
               <span className="text-white/30 text-sm">Or</span>
               <div className="h-px bg-white/10 flex-1" />
             </div>
-    {/* Google Sign-In Button */}
+            {/* Google Sign-In Button */}
             <a
-              href={`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google`}
+              href={`${process.env.NEXT_PUBLIC_API_URL || ""}/api/auth/google`}
               className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-medium py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 group my-8"
             >
               <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                     fill="#4285F4"
@@ -326,25 +397,34 @@ function LoginForm() {
               <span className="text-white/90">Sign in with Passkey</span>
             </button>
 
-        
-
             {/* Info Section */}
             <div className="flex items-center gap-4 glass rounded-2xl p-4 border border-white/5">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-5 h-5 text-blue-400" />
               </div>
               <p className="text-white/50 text-sm leading-relaxed">
-                We&apos;ll send you a magic link for instant, secure sign-in. No password needed!
+                We&apos;ll send you a magic link for instant, secure sign-in. No
+                password needed!
               </p>
             </div>
           </div>
 
           {/* Footer */}
           <p className="text-center text-white/30 text-sm mt-8">
-            By signing in, you agree to our{' '}
-            <Link href="/terms" className="text-white/50 hover:text-white transition-colors">Terms</Link>
-            {' '}and{' '}
-            <Link href="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</Link>
+            By signing in, you agree to our{" "}
+            <Link
+              href="/terms"
+              className="text-white/50 hover:text-white transition-colors"
+            >
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/privacy"
+              className="text-white/50 hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </Link>
           </p>
         </div>
       </div>
@@ -354,16 +434,18 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center relative">
-        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 bg-grid opacity-[0.05]" />
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center relative">
+          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 bg-grid opacity-[0.05]" />
+          </div>
+          <div className="relative z-10">
+            <div className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
+          </div>
         </div>
-        <div className="relative z-10">
-          <div className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
-        </div>
-      </div>
-    }>
+      }
+    >
       <LoginForm />
     </Suspense>
   );
