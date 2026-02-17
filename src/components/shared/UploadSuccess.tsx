@@ -51,11 +51,42 @@ export default function UploadSuccess({
 
   useEffect(() => {
     if (showQRCode && url) {
+      let darkColor = meta?.dominantColor || "#000000";
+
+      // Helper: Check if color is light
+      const isLight = (c: string) => {
+        if (!c) return false;
+        if (c.toLowerCase() === "white") return true;
+        const hex = c.replace("#", "");
+        let r, g, b;
+        if (hex.length === 3) {
+          r = parseInt(hex[0] + hex[0], 16);
+          g = parseInt(hex[1] + hex[1], 16);
+          b = parseInt(hex[2] + hex[2], 16);
+        } else if (hex.length === 6) {
+          r = parseInt(hex.substring(0, 2), 16);
+          g = parseInt(hex.substring(2, 4), 16);
+          b = parseInt(hex.substring(4, 6), 16);
+        } else {
+          return false;
+        }
+        return (r * 299 + g * 587 + b * 114) / 1000 > 150;
+      };
+
+      if (isLight(darkColor)) {
+        darkColor = "#000000";
+      }
+
+      // Ensure full opacity
+      if (darkColor.startsWith("#") && darkColor.length === 9) {
+        darkColor = darkColor.substring(0, 7);
+      }
+
       QRCode.toDataURL(url, {
         width: 400,
         margin: 1,
         color: {
-          dark: meta?.dominantColor || "#000000",
+          dark: darkColor,
           light: "#ffffff",
         },
         errorCorrectionLevel: "H",

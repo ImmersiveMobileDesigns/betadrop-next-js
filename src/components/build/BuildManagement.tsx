@@ -22,6 +22,7 @@ import type {
 import {
   formatFileSize,
   formatRelativeTime,
+  formatDateTime,
   copyToClipboard,
 } from "@/lib/utils";
 import {
@@ -1052,7 +1053,7 @@ export default function EnhancedBuildManagement({
                         <div className="text-xs text-white/40 mt-1">
                           {link.unique_devices} devices
                           {link.last_used_at &&
-                            ` • Last use ${formatRelativeTime(link.last_used_at)}`}
+                            ` • Last use ${formatDateTime(link.last_used_at)}`}
                         </div>
                       </div>
                     </div>

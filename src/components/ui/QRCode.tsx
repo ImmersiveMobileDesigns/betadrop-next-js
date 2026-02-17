@@ -14,6 +14,35 @@ interface QRCodeProps {
   icon?: string;
 }
 
+// Helper to check if a color is "light" using luminance
+// formula: Y = 0.299*R + 0.587*G + 0.114*B
+const isLightColor = (color: string) => {
+  if (!color) return false;
+  if (color.toLowerCase() === "white") return true;
+
+  // Clean hex
+  const hex = color.replace("#", "");
+
+  // Parse r, g, b
+  let r, g, b;
+  if (hex.length === 3) {
+    r = parseInt(hex[0] + hex[0], 16);
+    g = parseInt(hex[1] + hex[1], 16);
+    b = parseInt(hex[2] + hex[2], 16);
+  } else if (hex.length === 6) {
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  } else {
+    // Unknown format or invalid
+    return false;
+  }
+
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  // If brightness > 150 (scale 0-255), it's pretty light (including light greys)
+  return brightness > 150;
+};
+
 export default function QRCode({ url, size = 180, color, icon }: QRCodeProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -35,11 +64,24 @@ export default function QRCode({ url, size = 180, color, icon }: QRCodeProps) {
     setLoading(true);
     setError(false);
 
+    // Determine dark color
+    let darkColor = color?.dark || "#000000";
+
+    // If the "dark" color passed is actually light (e.g. white), fail-safe to black
+    if (isLightColor(darkColor)) {
+      darkColor = "#000000";
+    }
+
+    // Ensure full opacity
+    if (darkColor.startsWith("#") && darkColor.length === 9) {
+      darkColor = darkColor.substring(0, 7);
+    }
+
     QRCodeLib.toDataURL(url, {
       width: size * 2, // Generate higher res for better quality
       margin: 1,
       color: {
-        dark: color?.dark || "#000000",
+        dark: darkColor,
         light: color?.light || "#ffffff",
       },
       errorCorrectionLevel: "H", // High error correction to support logo overlay
