@@ -121,7 +121,7 @@ export default function ClawdBotTrending({
               </div>
 
               <h2 className="text-3xl font-bold text-white mb-2">
-                ClawdBot<span className="text-primary-400">.AI</span> Insights
+                <span className="text-primary-400">AI</span> Insights
               </h2>
               <p className="text-white/60 mb-6">
                 Analyzing trends to bring you the top topics in mobile

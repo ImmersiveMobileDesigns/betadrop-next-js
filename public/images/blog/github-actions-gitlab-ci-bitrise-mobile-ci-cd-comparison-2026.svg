@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A6BEF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F9A825;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glass" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="url(#grad)" />
+  
+  <!-- Decorative Circles -->
+  <circle cx="10%" cy="10%" r="200" fill="white" fill-opacity="0.05" />
+  <circle cx="90%" cy="90%" r="300" fill="white" fill-opacity="0.05" />
+  
+  <!-- Glass Card -->
+  <rect x="150" y="115" width="900" height="400" rx="30" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+  
+  <!-- Content -->
+  <text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" fill="white" filter="drop-shadow(0px 4px 4px rgba(0,0,0,0.2))">
+    🚀
+  </text>
+  <text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="60" fill="white" font-weight="bold" letter-spacing="1">
+    MOBILE CI/CD COMPARISON
+  </text>
+  
+  <!-- Branding -->
+  <text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="rgba(255,255,255,0.6)" font-weight="medium">
+    BETADROP.APP
+  </text>
+</svg>

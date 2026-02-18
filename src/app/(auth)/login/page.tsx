@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -10,20 +10,132 @@ import {
   Shield,
   Zap,
   Fingerprint,
+  KeyRound,
+  RefreshCw,
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useToast } from "@/components/ui/Toast";
 
 import { fetchFromLaravel } from "@/lib/api-client";
 
+// ─── OTP Input Component ─────────────────────────────────────────────────────
+function OtpInput({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled: boolean;
+}) {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleChange = (index: number, char: string) => {
+    if (!/^\d*$/.test(char)) return; // digits only
+    const digits = value.split("");
+    digits[index] = char.slice(-1); // take last char
+    const next = digits.join("").padEnd(6, "").slice(0, 6);
+    onChange(next);
+    if (char && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace") {
+      const digits = value.split("");
+      if (digits[index]) {
+        digits[index] = "";
+        onChange(digits.join("").padEnd(6, "").slice(0, 6));
+      } else if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+        const d = value.split("");
+        d[index - 1] = "";
+        onChange(d.join("").padEnd(6, "").slice(0, 6));
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+    onChange(pasted.padEnd(6, "").slice(0, 6));
+    const nextFocus = Math.min(pasted.length, 5);
+    inputRefs.current[nextFocus]?.focus();
+  };
+
+  return (
+    <div className="flex gap-3 justify-center">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <input
+          key={i}
+          ref={(el) => {
+            inputRefs.current[i] = el;
+          }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={value[i] || ""}
+          onChange={(e) => handleChange(i, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(i, e)}
+          onPaste={handlePaste}
+          disabled={disabled}
+          className={`w-12 h-14 text-center text-2xl font-bold rounded-xl border transition-all duration-200
+            bg-white/5 text-white placeholder-white/20
+            ${
+              value[i]
+                ? "border-primary-500/70 bg-primary-500/10 shadow-lg shadow-primary-500/20"
+                : "border-white/10 focus:border-primary-500/50 focus:bg-white/10 focus:ring-2 focus:ring-primary-500/20"
+            }
+            disabled:opacity-50 disabled:cursor-not-allowed outline-none`}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Main Login Form ──────────────────────────────────────────────────────────
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+
+  // OTP state
+  const [otpMode, setOtpMode] = useState(false); // true = show OTP input after email sent
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
+  // Resend cooldown — seconds remaining (0 = can resend)
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Tick the cooldown timer down every second
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    cooldownRef.current = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(cooldownRef.current!);
+  }, [resendCooldown]);
+
   const searchParams = useSearchParams();
-  const { error: toastError } = useToast();
+  const { error: toastError, success: toastSuccess } = useToast();
 
   const errorParam = searchParams.get("error");
   const errorMessages: Record<string, string> = {
@@ -36,36 +148,93 @@ function LoginForm() {
     unverified_email: "Please verify your Google email address first.",
   };
 
+  // ── Send magic link + OTP email (optimistic) ──
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
-    setIsSent(true);
 
-    try {
-      await fetchFromLaravel("/api/auth/login", {
-        method: "POST",
-        // fetchFromLaravel adds Content-Type
-        body: JSON.stringify({ email }),
-      });
-    } catch (err) {
+    // Immediately show the "check your email" screen — don't wait for the API
+    setIsSent(true);
+    setOtpMode(false);
+
+    // Fire the API in the background; snap back if it fails
+    fetchFromLaravel("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }).catch((err) => {
       console.error(err);
-      setIsSent(false);
       const message =
         err instanceof Error ? err.message : "Please try again later";
+      // Revert to the form and show the error
+      setIsSent(false);
       setError(message);
       toastError(message);
+    });
+  };
+
+  // ── Resend email (with cooldown + success toast) ──
+  const handleResend = () => {
+    if (resendCooldown > 0) return;
+
+    // Start 60-second cooldown immediately
+    setResendCooldown(60);
+    setOtp("");
+    setOtpError("");
+
+    fetchFromLaravel("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    })
+      .then(() => {
+        toastSuccess("Email resent! Check your inbox.");
+      })
+      .catch((err) => {
+        console.error(err);
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to resend. Please try again.";
+        toastError(message);
+        // Reset cooldown so they can try again right away after an error
+        setResendCooldown(0);
+      });
+  };
+
+  // ── Verify OTP ──
+  const handleVerifyOtp = async () => {
+    if (otp.replace(/\s/g, "").length !== 6) {
+      setOtpError("Please enter the full 6-digit code.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    setOtpError("");
+
+    try {
+      await fetchFromLaravel("/api/auth/verify-otp", {
+        method: "POST",
+        body: JSON.stringify({ email, otp }),
+      });
+      toastSuccess("Signed in successfully!");
+      window.location.href = "/dashboard";
+    } catch (err) {
+      console.error(err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Invalid or expired OTP. Please try again.";
+      setOtpError(message);
+      toastError(message);
     } finally {
-      setIsLoading(false);
+      setIsVerifyingOtp(false);
     }
   };
 
+  // ── Passkey login ──
   const handlePasskeyLogin = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      // Check if WebAuthn is supported
       if (!window.PublicKeyCredential) {
         setError(
           "Your current browser doesn't support Passkeys. Please use Chrome, Edge, or Safari.",
@@ -73,26 +242,21 @@ function LoginForm() {
         return;
       }
 
-      // Get authentication options from server
       const optionsRes = await fetchFromLaravel<{
         success: boolean;
         data: any;
         error?: string;
       }>("/api/auth/passkey/login");
 
-      // The backend should return options in `data`. Check success.
       if (!optionsRes.success) {
         setError(optionsRes.error || "Failed to start passkey login");
         return;
       }
 
       const { options, challenge } = optionsRes.data;
-
-      // Start WebAuthn authentication
       const { startAuthentication } = await import("@simplewebauthn/browser");
       const authResponse = await startAuthentication({ optionsJSON: options });
 
-      // Verify with server
       const verifyRes = await fetchFromLaravel<{
         success: boolean;
         error?: string;
@@ -106,7 +270,6 @@ function LoginForm() {
         return;
       }
 
-      // Success - redirect to dashboard
       window.location.href = "/dashboard";
     } catch (err: unknown) {
       console.error("Passkey login error:", err);
@@ -124,6 +287,9 @@ function LoginForm() {
     }
   };
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // SENT STATE: show "check email" + OTP entry option
+  // ─────────────────────────────────────────────────────────────────────────
   if (isSent) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 relative">
@@ -138,8 +304,8 @@ function LoginForm() {
         </div>
 
         <div className="relative z-10 w-full max-w-md">
-          <div className="glass rounded-3xl p-10 border border-white/10 shadow-2xl shadow-black/20 text-center">
-            {/* Success Icon */}
+          <div className="glass rounded-3xl p-8 sm:p-10 border border-white/10 shadow-2xl shadow-black/20 text-center">
+            {/* Icon */}
             <div className="relative mx-auto mb-8 w-20 h-20">
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/30 to-green-500/30 animate-pulse" />
               <div className="relative w-full h-full rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -151,24 +317,141 @@ function LoginForm() {
               Check Your Inbox
             </h1>
             <p className="text-white/60 mb-2 text-lg">
-              We sent a magic link to
+              We sent a sign-in link &amp; code to
             </p>
             <p className="text-white font-semibold text-lg mb-6 bg-white/5 rounded-xl py-2 px-4 inline-block">
               {email}
             </p>
-            <p className="text-white/40 text-sm leading-relaxed">
-              Click the link in the email to sign in instantly.
-              <br />
-              The link expires in 15 minutes.
-            </p>
 
-            <div className="mt-8 pt-6 border-t border-white/10">
+            {/* Tab switcher */}
+            <div className="flex rounded-xl overflow-hidden border border-white/10 mb-6">
               <button
-                onClick={() => setIsSent(false)}
+                onClick={() => {
+                  setOtpMode(false);
+                  setOtpError("");
+                  setOtp("");
+                }}
+                className={`flex-1 py-3 text-sm font-medium transition-all ${
+                  !otpMode
+                    ? "bg-white/10 text-white"
+                    : "text-white/40 hover:text-white/70"
+                }`}
+              >
+                <Mail className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+                Magic Link
+              </button>
+              <button
+                onClick={() => {
+                  setOtpMode(true);
+                  setOtpError("");
+                }}
+                className={`flex-1 py-3 text-sm font-medium transition-all ${
+                  otpMode
+                    ? "bg-white/10 text-white"
+                    : "text-white/40 hover:text-white/70"
+                }`}
+              >
+                <KeyRound className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+                Enter OTP
+              </button>
+            </div>
+
+            {/* Magic Link tab */}
+            {!otpMode && (
+              <p className="text-white/40 text-sm leading-relaxed">
+                Click the link in the email to sign in instantly.
+                <br />
+                The link expires in 15 minutes.
+              </p>
+            )}
+
+            {/* OTP tab */}
+            {otpMode && (
+              <div className="space-y-5">
+                <p className="text-white/50 text-sm">
+                  Enter the 6-digit code from your email
+                </p>
+
+                <OtpInput
+                  value={otp}
+                  onChange={(v) => {
+                    setOtp(v);
+                    setOtpError("");
+                  }}
+                  disabled={isVerifyingOtp}
+                />
+
+                {otpError && (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">
+                    {otpError}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleVerifyOtp}
+                  disabled={
+                    isVerifyingOtp || otp.replace(/\s/g, "").length !== 6
+                  }
+                  className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-400 hover:to-accent-400 text-white font-semibold py-4 rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group"
+                >
+                  {isVerifyingOtp ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Verify &amp; Sign In</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setIsSent(false);
+                  setOtp("");
+                  setOtpError("");
+                  setOtpMode(false);
+                }}
                 className="text-primary-400 hover:text-primary-300 text-sm font-medium transition-colors flex items-center justify-center gap-2 mx-auto group"
               >
                 <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
                 Use a different email
+              </button>
+              <button
+                onClick={handleResend}
+                disabled={resendCooldown > 0}
+                className="text-white/30 hover:text-white/60 disabled:opacity-40 disabled:cursor-not-allowed text-sm transition-colors flex items-center justify-center gap-1.5 mx-auto"
+              >
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${resendCooldown > 0 ? "animate-spin" : ""}`}
+                  style={resendCooldown > 0 ? { animationDuration: "2s" } : {}}
+                />
+                {resendCooldown > 0
+                  ? `Resend in ${resendCooldown}s`
+                  : "Resend email"}
               </button>
             </div>
           </div>
@@ -177,6 +460,9 @@ function LoginForm() {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // DEFAULT: Email entry form
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex relative overflow-hidden">
       {/* Background Effects */}
@@ -337,7 +623,7 @@ function LoginForm() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    <span>Sending Magic Link...</span>
+                    <span>Sending...</span>
                   </>
                 ) : (
                   <>
@@ -403,8 +689,9 @@ function LoginForm() {
                 <Sparkles className="w-5 h-5 text-blue-400" />
               </div>
               <p className="text-white/50 text-sm leading-relaxed">
-                We&apos;ll send you a magic link for instant, secure sign-in. No
-                password needed!
+                We&apos;ll send you a magic link{" "}
+                <strong className="text-white/70">and</strong> a 6-digit OTP for
+                instant, secure sign-in. No password needed!
               </p>
             </div>
           </div>
