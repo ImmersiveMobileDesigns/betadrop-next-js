@@ -626,7 +626,7 @@ export default function AppInstallView({
                         alt={data.customBrandName || data.appName}
                         fill
                         sizes="(max-width: 1024px) 80px, 96px"
-                        className="object-contain p-2"
+                        className="object-cover"
                         onError={() => setIconError(true)}
                       />
                     ) : data.iconUrl && !iconError ? (
